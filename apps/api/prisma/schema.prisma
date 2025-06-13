@@ -6,16 +6,163 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Sample {
-  id        Int      @id @default(autoincrement())
-  name      String
-  code      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model User {
+  id                  Int          @id @default(autoincrement())
+  name                String?
+  email               String       @unique
+  phone               String?
+  passwordHash        String?
+  profilePhoto        String?
+  isVerified          Boolean      @default(false)
+  role                Role
+  authProvider        AuthProvider @default(EMAIL)
+  verificationToken   String?
+  verificationExpires DateTime?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
 
-  @@map("samples") // if you want to use snake_case format
+  // Relations
+  tenant   Tenant?
+  bookings Booking[]
+  reviews  Review[]
+}
+
+model Tenant {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique
+  companyName String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user       User       @relation(fields: [userId], references: [id])
+  properties Property[]
+}
+
+model PropertyCategory {
+  id         Int        @id @default(autoincrement())
+  name       String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  properties Property[]
+}
+
+model Property {
+  id          Int      @id @default(autoincrement())
+  tenantId    Int
+  categoryId  Int
+  name        String
+  description String?
+  location    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant   Tenant           @relation(fields: [tenantId], references: [id])
+  category PropertyCategory @relation(fields: [categoryId], references: [id])
+  rooms    Room[]
+  bookings Booking[]
+}
+
+model Room {
+  id          Int      @id @default(autoincrement())
+  propertyId  Int
+  name        String
+  description String?
+  basePrice   Float
+  capacity    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  property       Property           @relation(fields: [propertyId], references: [id])
+  availabilities RoomAvailability[]
+  peakRates      PeakSeasonRate[]
+  bookings       Booking[]
+}
+
+model RoomAvailability {
+  id          Int      @id @default(autoincrement())
+  roomId      Int
+  date        DateTime
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  room Room @relation(fields: [roomId], references: [id])
+
+  @@unique([roomId, date])
+}
+
+model PeakSeasonRate {
+  id                 Int               @id @default(autoincrement())
+  roomId             Int
+  startDate          DateTime
+  endDate            DateTime
+  priceModifierType  PriceModifierType
+  priceModifierValue Float
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  room Room @relation(fields: [roomId], references: [id])
+}
+
+model Booking {
+  id           Int           @id @default(autoincrement())
+  userId       Int
+  propertyId   Int
+  roomId       Int
+  checkinDate  DateTime
+  duration     Int
+  totalPrice   Float
+  status       BookingStatus
+  paymentProof String? // path or URL ke file
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id])
+  room     Room     @relation(fields: [roomId], references: [id])
+  review   Review?
+}
+
+model Review {
+  id          Int      @id @default(autoincrement())
+  bookingId   Int      @unique
+  userId      Int
+  rating      Int? // opsional, misal 1-5
+  comment     String
+  tenantReply String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  USER
+  TENANT
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+}
+
+enum BookingStatus {
+  WAITING_PAYMENT
+  WAITING_CONFIRMATION
+  CANCELED
+  CONFIRMED
+  DONE
+  REJECTED
+  EXPIRED
+}
+
+enum PriceModifierType {
+  PERCENTAGE
+  NOMINAL
 }
