@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { UserInput } from '@/models/interface';
+import { TenantInput } from '@/models/interface';
 import { AuthService } from '@/services/auth.service';
 
 export class AuthController {
@@ -20,6 +21,22 @@ export class AuthController {
     } catch (error) {
       res.status(500).json({
         message: 'Failed to create user',
+        detail: error,
+      });
+    }
+  }
+
+  async createTenant(req: Request, res: Response): Promise<void> {
+    try {
+      const data: TenantInput = req.body;
+      const result = await this.authService.createTenant(data);
+      res.status(201).json({
+        message: 'Tenant Created',
+        data: result,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: 'Failed to create tenant',
         detail: error,
       });
     }

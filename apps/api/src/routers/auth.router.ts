@@ -20,5 +20,9 @@ export class AuthRouter {
       '/users/verify',
       this.authController.verify.bind(this.authController),
     );
+    this.router.post(
+      '/register-tenant',
+      this.authController.createTenant.bind(this.authController),
+    );
   }
 }

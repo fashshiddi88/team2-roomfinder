@@ -5,6 +5,7 @@ import { sendVerificationEmail } from '@/lib/utils/email';
 import { randomUUID } from 'crypto';
 import { JwtUtils } from '@/lib/token.config';
 import { UserInput } from '@/models/interface';
+import { TenantInput } from '@/models/interface';
 import { UserPayLoad } from '@/models/interface';
 
 export class AuthService {
@@ -15,8 +16,8 @@ export class AuthService {
       throw new Error('Email already in use');
     }
 
-    const verificationToken = randomUUID(); // gunakan UUID sebagai token
-    const verificationExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 jam dari sekarang
+    const verificationToken = randomUUID();
+    const verificationExpires = new Date(Date.now() + 60 * 60 * 1000);
 
     const user = await prisma.user.create({
       data: {
@@ -33,6 +34,39 @@ export class AuthService {
     await sendVerificationEmail(user.email, verificationLink);
 
     return { message: 'User created. Verification email sent.' };
+  }
+
+  async createTenant(data: TenantInput) {
+    const { email, companyName } = data;
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      throw new Error('Email already in use');
+    }
+
+    const verificationToken = randomUUID();
+    const verificationExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 jam
+
+    const user = await prisma.user.create({
+      data: {
+        email,
+        name: '',
+        role: Role.TENANT,
+        isVerified: false,
+        verificationToken,
+        verificationExpires,
+        tenant: {
+          create: {
+            companyName,
+          },
+        },
+      },
+      include: { tenant: true },
+    });
+
+    const verificationLink = `${process.env.FRONTEND_URL}/verify?token=${verificationToken}`;
+    await sendVerificationEmail(user.email, verificationLink);
+
+    return { message: 'Tenant created. Verification email sent.' };
   }
 
   async verifyUser(token: string, password: string) {
