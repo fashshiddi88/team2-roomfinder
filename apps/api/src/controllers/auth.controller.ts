@@ -67,4 +67,26 @@ export class AuthController {
       });
     }
   }
+
+  public async login(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, password } = req.body;
+      console.log(email, password);
+
+      if (!email || !password) {
+        res.status(400).json({ message: 'Email and password are required' });
+        return;
+      }
+      const result = await this.authService.login(email, password);
+
+      res.status(200).json({
+        data: result,
+      });
+    } catch (error: any) {
+      res.status(401).json({
+        message: 'Unauthorized: Failed login',
+        error: error.message,
+      });
+    }
+  }
 }

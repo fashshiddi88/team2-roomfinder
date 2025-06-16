@@ -60,7 +60,12 @@ export class OauthService {
     });
 
     const token = JwtUtils.generateToken(
-      { userId: user.id, email: user.email },
+      {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+        purpose: 'access',
+      },
       '2h',
     );
 
@@ -121,7 +126,12 @@ export class OauthService {
     }
 
     const token = JwtUtils.generateToken(
-      { userId: user.id, email: user.email },
+      {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+        purpose: 'access',
+      },
       '2h',
     );
 

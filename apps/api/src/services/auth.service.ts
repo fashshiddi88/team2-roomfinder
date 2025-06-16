@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto';
 import { JwtUtils } from '@/lib/token.config';
 import { UserInput } from '@/models/interface';
 import { TenantInput } from '@/models/interface';
+import bcrypt from 'bcrypt';
 import { UserPayLoad } from '@/models/interface';
 
 export class AuthService {
@@ -99,33 +100,38 @@ export class AuthService {
     return { message: 'Account verified successfully' };
   }
 
-  async login(email: string, password: string) {
+  public async login(email: string, password: string) {
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || !user.passwordHash) {
-      throw new Error('Invalid credentials');
+
+    if (!user) {
+      throw new Error('Email not found, please Sign Up');
     }
 
-    if (!user.isVerified) {
-      throw new Error('Please verify your email first');
+    if (!user.passwordHash) {
+      throw new Error('User registered via OAuth. Please login with Google.');
     }
 
-    const isMatch = await comparePassword(password, user.passwordHash);
-    if (!isMatch) {
-      throw new Error('Invalid credentials');
+    const isValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isValid) {
+      throw new Error('Invalid email or password');
     }
 
-    const payload: UserPayLoad = {
+    const token = JwtUtils.generateToken({
       userId: user.id,
       email: user.email,
       role: user.role,
       purpose: 'access',
-    };
-
-    const accessToken = JwtUtils.generateToken(payload);
+    });
 
     return {
       message: 'Login successful',
-      accessToken,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      access_token: token,
     };
   }
 }

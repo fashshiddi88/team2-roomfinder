@@ -1,7 +1,8 @@
-import { Mail, Lock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import Logo from "@/components/atomics/logo";
+'use client';
+import { Mail, Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import Logo from '@/components/atomics/logo';
 
 export default function LoginPage() {
   return (
@@ -115,6 +116,10 @@ export default function LoginPage() {
                 type="button"
                 variant="outline"
                 className="w-full py-3 flex items-center justify-center space-x-3"
+                onClick={() => {
+                  window.location.href =
+                    'http://localhost:8000/api/auth/google';
+                }}
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24">
                   <path
@@ -143,7 +148,7 @@ export default function LoginPage() {
         {/* Sign Up Link */}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            Don&apos;t have an account?{" "}
+            Don&apos;t have an account?{' '}
             <a
               href="/register"
               className="font-medium text-blue-600 hover:text-blue-500 transition-colors"

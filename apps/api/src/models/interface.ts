@@ -10,6 +10,6 @@ export interface TenantInput {
 export interface UserPayLoad {
   userId: number;
   email: string;
-  role?: string;
-  purpose?: 'verify' | 'access'; // Tambahan jika kamu mau pisahkan jenis token
+  role: 'USER' | 'TENANT';
+  purpose?: 'verify' | 'access';
 }
