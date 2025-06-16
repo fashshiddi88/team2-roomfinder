@@ -50,3 +50,11 @@ export const resetPasswordSchema = {
     newPassword: zod.string().min(6, 'Password must be at least 6 characters'),
   }),
 };
+
+export const updateProfileSchema = {
+  body: zod.object({
+    name: zod.string().optional(),
+    email: zod.string().email().optional(),
+    phone: zod.string().optional(),
+  }),
+};
