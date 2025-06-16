@@ -71,7 +71,6 @@ export class AuthController {
   public async login(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
-      console.log(email, password);
 
       if (!email || !password) {
         res.status(400).json({ message: 'Email and password are required' });
@@ -87,6 +86,28 @@ export class AuthController {
         message: 'Unauthorized: Failed login',
         error: error.message,
       });
+    }
+  }
+
+  public async forgotPassword(req: Request, res: Response) {
+    try {
+      const { email } = req.body;
+      const result = await this.authService.forgotPassword(email);
+      res.status(200).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  }
+
+  public async resetPassword(req: Request, res: Response) {
+    try {
+      const { token, newPassword } = req.body;
+
+      const result = await this.authService.resetPassword(token, newPassword);
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
     }
   }
 }

@@ -7,6 +7,8 @@ import {
 import { registerSchema } from '@/lib/validations/validations.schema';
 import { loginSchema } from '@/lib/validations/validations.schema';
 import { verifySchema } from '@/lib/validations/validations.schema';
+import { resetPasswordSchema } from '@/lib/validations/validations.schema';
+import { forgotPasswordSchema } from '@/lib/validations/validations.schema';
 import { ValidationMiddleware } from '@/middlewares/validation.middleware';
 
 export class AuthRouter {
@@ -39,6 +41,16 @@ export class AuthRouter {
       '/auth/login',
       ValidationMiddleware.validate(loginSchema),
       this.authController.login.bind(this.authController),
+    );
+
+    this.router.post(
+      '/auth/forgot-password',
+      ValidationMiddleware.validate(forgotPasswordSchema),
+      this.authController.forgotPassword.bind(this.authController),
+    );
+    this.router.post(
+      '/auth/reset-password',
+      this.authController.resetPassword.bind(this.authController),
     );
   }
 }

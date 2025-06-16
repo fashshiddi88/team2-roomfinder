@@ -2,6 +2,7 @@ import { prisma } from '@/prisma/client';
 import { Role } from '@prisma/client';
 import { hashPassword, comparePassword } from '@/lib/utils/password.helper';
 import { sendVerificationEmail } from '@/lib/utils/email';
+import { sendMail } from '@/lib/nodemailer.config';
 import { randomUUID } from 'crypto';
 import { JwtUtils } from '@/lib/token.config';
 import { UserInput } from '@/models/interface';
@@ -133,5 +134,50 @@ export class AuthService {
       },
       access_token: token,
     };
+  }
+
+  public async forgotPassword(email: string) {
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      throw new Error('Email not found');
+    }
+
+    const resetToken = JwtUtils.generateToken(
+      { userId: user.id, email: user.email, role: user.role },
+      '15m', // token expire 15 menit
+    );
+
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+    await sendMail({
+      to: user.email,
+      subject: 'Password Reset Request',
+      html: `
+        <p>You requested to reset your password.</p>
+        <p>Click this link to reset your password:</p>
+        <a href="${resetLink}">${resetLink}</a>
+        <p>This link will expire in 15 minutes.</p>
+      `,
+    });
+
+    return { message: 'Password reset email sent' };
+  }
+
+  public async resetPassword(token: string, newPassword: string) {
+    const decoded = JwtUtils.verifyToken(token); // verify dulu
+
+    if (!decoded || !decoded.userId) {
+      throw new Error('Invalid or expired token');
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+
+    await prisma.user.update({
+      where: { id: decoded.userId },
+      data: { passwordHash: hashedPassword },
+    });
+
+    return { message: 'Password has been reset successfully' };
   }
 }

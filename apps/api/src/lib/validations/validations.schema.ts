@@ -38,3 +38,15 @@ export const verifySchema = {
     token: zod.string().min(1, 'Token is required'),
   }),
 };
+
+export const forgotPasswordSchema = {
+  body: zod.object({
+    email: zod.string().email(),
+  }),
+};
+
+export const resetPasswordSchema = {
+  body: zod.object({
+    newPassword: zod.string().min(6, 'Password must be at least 6 characters'),
+  }),
+};
