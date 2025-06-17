@@ -4,14 +4,14 @@ import {
   FaFacebookF,
   FaTwitter,
   FaInstagram,
-  FaLinkedinIn
+  FaLinkedinIn,
 } from 'react-icons/fa';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   const socialList = ['facebook', 'twitter', 'instagram', 'linkedin'] as const;
-  type Social = typeof socialList[number];
+  type Social = (typeof socialList)[number];
 
   const icons: Record<Social, React.ReactElement> = {
     facebook: <FaFacebookF />,
@@ -27,14 +27,15 @@ export default function Footer() {
           <div>
             <h3 className="text-xl font-bold mb-4">Room Finder</h3>
             <p className="text-gray-400 mb-4">
-              The best accommodation search platform with competitive prices and easy transactions.
+              The best accommodation search platform with competitive prices and
+              easy transactions.
             </p>
-            
+
             {/* Social icons in a row */}
             <div className="flex space-x-4 mt-4">
               {socialList.map((social) => (
-                <a 
-                  key={social} 
+                <a
+                  key={social}
                   href="#" // Replace with actual links
                   className="bg-gray-800 p-2 rounded-full hover:bg-blue-600 transition-colors text-white text-sm"
                   aria-label={`Follow us on ${social}`}
@@ -48,25 +49,30 @@ export default function Footer() {
           {/* Link sections */}
           {[
             {
-              title: "Company",
-              links: ["About Us", "Careers", "Blog", "Partners"]
+              title: 'Company',
+              links: ['About Us', 'Careers', 'Blog', 'Partners'],
             },
             {
-              title: "Support",
-              links: ["Help Center", "Privacy Policy", "Terms & Conditions", "Contact"]
+              title: 'Support',
+              links: [
+                'Help Center',
+                'Privacy Policy',
+                'Terms & Conditions',
+                'Contact',
+              ],
             },
             {
-              title: "Popular Destinations",
-              links: ["Bali", "Jakarta", "Yogyakarta", "Bandung", "Lombok"]
-            }
+              title: 'Popular Destinations',
+              links: ['Bali', 'Jakarta', 'Yogyakarta', 'Bandung', 'Lombok'],
+            },
           ].map((section, index) => (
             <div key={index}>
               <h4 className="text-lg font-semibold mb-4">{section.title}</h4>
               <ul className="space-y-2">
                 {section.links.map((link, i) => (
                   <li key={i}>
-                    <Link 
-                      href="#" 
+                    <Link
+                      href="#"
                       className="text-gray-400 hover:text-white transition-colors"
                     >
                       {link}
