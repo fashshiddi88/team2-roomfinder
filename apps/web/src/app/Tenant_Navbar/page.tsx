@@ -8,15 +8,14 @@ import {
   Star,
   Settings,
   LogOut,
-  ChevronRight,
+  ChevronLeft,
   User,
   Hotel,
-  ChevronLeft
 } from 'lucide-react';
 import { useState } from 'react';
 
 const tenantMenu = [
-  { label: 'Dashboard', href: '/', icon: <Home size={20} /> },
+  { label: 'My Property', href: '/Tenant_Property', icon: <Home size={20} /> },
   { label: 'Bookings', href: '/Tenant_Bookings', icon: <CalendarCheck size={20} /> },
   { label: 'Reviews', href: '/Tenant_Reviews', icon: <Star size={20} /> },
   { label: 'Settings', href: '/Tenant_Settings', icon: <Settings size={20} /> },
@@ -41,7 +40,6 @@ export default function TenantSidebar() {
             </div>
             <div>
               <h1 className="font-bold text-xl text-gray-800">Tenant Panel</h1>
-              {/* <p className="text-xs text-gray-500">Premium Edition</p> */}
             </div>
           </div>
         )}
@@ -51,9 +49,7 @@ export default function TenantSidebar() {
         >
           <ChevronLeft
             size={20}
-            className={`transition-transform ${
-              collapsed ? 'rotate-180' : ''
-            }`}
+            className={`transition-transform ${collapsed ? 'rotate-180' : ''}`}
           />
         </button>
       </div>
@@ -71,39 +67,42 @@ export default function TenantSidebar() {
         )}
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 py-4 px-2">
-        {tenantMenu.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 mb-1 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'text-gray-600 hover:bg-blue-100 hover:text-blue-700'
-              } ${collapsed ? 'justify-center' : ''}`}
-            >
-              <span className={isActive ? 'text-white' : 'text-blue-500'}>
-                {item.icon}
-              </span>
-              {!collapsed && <span>{item.label}</span>}
-            </Link>
-          );
-        })}
-      </nav>
+      {/* Main Content (menu + logout) */}
+      <div className="flex-1 overflow-y-auto">
+        {/* Navigation */}
+        <nav className="py-4 px-2">
+          {tenantMenu.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-3 mb-1 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-gray-600 hover:bg-blue-100 hover:text-blue-700'
+                } ${collapsed ? 'justify-center' : ''}`}
+              >
+                <span className={isActive ? 'text-white' : 'text-blue-500'}>
+                  {item.icon}
+                </span>
+                {!collapsed && <span>{item.label}</span>}
+              </Link>
+            );
+          })}
+        </nav>
 
-      {/* Footer with Logout */}
-      <div className="p-4 border-t border-gray-200">
-        <button
-          className={`flex items-center gap-3 text-gray-600 hover:text-red-600 w-full ${
-            collapsed ? 'justify-center' : ''
-          }`}
-        >
-          <LogOut size={20} className="text-gray-500" />
-          {!collapsed && <span>Logout</span>}
-        </button>
+        {/* Logout - moved just below nav */}
+        <div className="px-4 pt-2">
+          <button
+            className={`flex items-center gap-3 text-gray-600 hover:text-red-600 w-full ${
+              collapsed ? 'justify-center' : ''
+            }`}
+          >
+            <LogOut size={20} className="text-gray-500" />
+            {!collapsed && <span>Logout</span>}
+          </button>
+        </div>
       </div>
     </aside>
   );
