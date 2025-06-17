@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { ProfileController } from '@/controllers/profile.controller';
 import { AuthenticationMiddleware } from '@/middlewares/authentication.middleware';
+import { AuthorizationMiddleware } from '@/middlewares/authorization.middleware';
 import { uploadProfileImage } from '@/middlewares/upload.middleware';
 import { ValidationMiddleware } from '@/middlewares/validation.middleware';
 import { updateProfileSchema } from '@/lib/validations/validations.schema';
@@ -20,11 +21,21 @@ export class ProfileRouter {
     this.router.get(
       '/profile',
       AuthenticationMiddleware.verifyToken,
+      AuthorizationMiddleware.allowRoles('USER'),
       this.profileController.getProfileUser.bind(this.profileController),
     );
+
+    this.router.get(
+      '/profile/tenant',
+      AuthenticationMiddleware.verifyToken,
+      AuthorizationMiddleware.allowRoles('TENANT'),
+      this.profileController.getProfileTenant.bind(this.profileController),
+    );
+
     this.router.patch(
       '/profile',
       AuthenticationMiddleware.verifyToken,
+      AuthorizationMiddleware.allowRoles('USER'),
       uploadProfileImage.single('image'),
       ValidationMiddleware.validate(updateProfileSchema),
       this.profileController.updateProfile.bind(this.profileController),
@@ -37,7 +48,7 @@ export class ProfileRouter {
     this.router.patch(
       '/profile/password',
       AuthenticationMiddleware.verifyToken,
-      ValidationMiddleware.validate(updatePasswordSchema),
+      ValidationMiddleware.validate({ body: updatePasswordSchema }),
       this.profileController.updatePassword.bind(this.profileController),
     );
   }
