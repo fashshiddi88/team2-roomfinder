@@ -59,9 +59,17 @@ export const updateProfileSchema = {
   }),
 };
 
-export const updatePasswordSchema = {
-  body: zod.object({
-    oldPassword: zod.string().min(6, 'Password must be at least 6 characters'),
-    newPassword: zod.string().min(6, 'Password must be at least 6 characters'),
-  }),
-};
+export const updatePasswordSchema = zod
+  .object({
+    oldPassword: zod
+      .string()
+      .min(6, 'Old password must be at least 6 characters'),
+    newPassword: zod
+      .string()
+      .min(6, 'New password must be at least 6 characters'),
+    confirmNewPassword: zod.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: 'New password and confirm password must match',
+    path: ['confirmNewPassword'],
+  });
