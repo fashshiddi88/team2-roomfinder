@@ -58,3 +58,10 @@ export const updateProfileSchema = {
     phone: zod.string().optional(),
   }),
 };
+
+export const updatePasswordSchema = {
+  body: zod.object({
+    oldPassword: zod.string().min(6, 'Password must be at least 6 characters'),
+    newPassword: zod.string().min(6, 'Password must be at least 6 characters'),
+  }),
+};

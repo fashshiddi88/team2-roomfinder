@@ -82,4 +82,30 @@ export class ProfileService {
 
     return { message: 'Email verified successfully' };
   }
+
+  public async updatePassword(
+    userId: number,
+    oldPassword: string,
+    newPassword: string,
+  ) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user || !user.passwordHash) {
+      throw new Error('User not found or password not set');
+    }
+
+    const isMatch = await comparePassword(oldPassword, user.passwordHash);
+    if (!isMatch) {
+      throw new Error('Old password is incorrect');
+    }
+
+    const newHashedPassword = await hashPassword(newPassword);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: newHashedPassword },
+    });
+
+    return { message: 'Password updated successfully' };
+  }
 }

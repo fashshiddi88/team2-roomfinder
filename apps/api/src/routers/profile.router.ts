@@ -4,6 +4,7 @@ import { AuthenticationMiddleware } from '@/middlewares/authentication.middlewar
 import { uploadProfileImage } from '@/middlewares/upload.middleware';
 import { ValidationMiddleware } from '@/middlewares/validation.middleware';
 import { updateProfileSchema } from '@/lib/validations/validations.schema';
+import { updatePasswordSchema } from '@/lib/validations/validations.schema';
 
 export class ProfileRouter {
   public router: Router;
@@ -32,6 +33,12 @@ export class ProfileRouter {
       '/verify-updated-email',
       AuthenticationMiddleware.verifyToken,
       this.profileController.verifyUpdatedEmail.bind(this.profileController),
+    );
+    this.router.patch(
+      '/profile/password',
+      AuthenticationMiddleware.verifyToken,
+      ValidationMiddleware.validate(updatePasswordSchema),
+      this.profileController.updatePassword.bind(this.profileController),
     );
   }
 }

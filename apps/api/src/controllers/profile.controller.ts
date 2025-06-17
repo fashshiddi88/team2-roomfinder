@@ -79,4 +79,24 @@ export class ProfileController {
       });
     }
   }
+
+  public async updatePassword(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user?.userId;
+      const { oldPassword, newPassword } = req.body;
+
+      const result = await this.profileService.updatePassword(
+        userId,
+        oldPassword,
+        newPassword,
+      );
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      res.status(400).json({
+        message: 'Failed to update password',
+        detail: error.message,
+      });
+    }
+  }
 }
