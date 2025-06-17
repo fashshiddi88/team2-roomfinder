@@ -1,22 +1,14 @@
 "use client";
 import Link from 'next/link';
 import { useState } from 'react';
-import LoginForm from './LoginForm';
-import RegisterForm from './RegisterForm';
+import RegisterForm from '@/components/Register/RegisterForm';
 import Image from 'next/image';
 
 export default function Navbar() {
-  const [showLoginForm, setShowLoginForm] = useState(false);
   const [showRegisterForm, setShowRegisterForm] = useState(false);
-
-  const toggleLogin = () => {
-    setShowLoginForm((prev) => !prev);
-    if (!showLoginForm) setShowRegisterForm(false);
-  };
 
   const toggleRegister = () => {
     setShowRegisterForm((prev) => !prev);
-    if (!showRegisterForm) setShowLoginForm(false);
   };
 
   return (
@@ -49,28 +41,26 @@ export default function Navbar() {
 
         {/* Action Buttons */}
         <div className="flex items-center space-x-4">
-
-          
           <Link
             href="/become-a-tenant"
             className="bg-black text-white px-5 py-2 rounded-lg hover:bg-yellow-600 transition-colors font-semibold"
           >
             Become a Tenant
           </Link>
-          
-          <button
+
+          <Link
+            href="/Login"
             className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-            onClick={toggleLogin}
           >
             Login
-          </button>
+          </Link>
 
-          <button
+          <Link
+            href="/Register"
             className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition-colors font-semibold"
-            onClick={toggleRegister}
           >
             Register
-          </button>
+          </Link>
 
 
           <button className="md:hidden p-2 rounded-md" aria-label="Menu">
@@ -91,13 +81,7 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Pop-up Login/Register Forms */}
-        {showLoginForm && (
-          <div className="absolute right-6 top-full mt-2 w-80 bg-white p-6 rounded-md shadow-lg z-50">
-            <LoginForm />
-          </div>
-        )}
-
+        {/* Pop-up Register Form */}
         {showRegisterForm && (
           <div className="absolute right-6 top-full mt-2 w-80 bg-white p-6 rounded-md shadow-lg z-50">
             <RegisterForm />
