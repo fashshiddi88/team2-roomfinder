@@ -24,5 +24,13 @@ export class PropertyRouter {
       ValidationMiddleware.validate(createPropertySchema),
       this.propertyController.createProperty.bind(this.propertyController),
     );
+
+    this.router.put(
+      '/property/:id',
+      AuthenticationMiddleware.verifyToken,
+      AuthorizationMiddleware.allowRoles('TENANT'),
+      uploadFields,
+      this.propertyController.updateProperty.bind(this.propertyController),
+    );
   }
 }

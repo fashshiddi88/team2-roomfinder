@@ -73,4 +73,68 @@ export class PropertyService {
       },
     });
   }
+
+  async updateProperty(
+    propertyId: number,
+    userId: number,
+    data: {
+      name?: string;
+      categoryId?: number;
+      description?: string;
+      address?: string;
+      cityId?: number;
+    },
+    mainImage?: Express.Multer.File,
+    galleryImages?: Express.Multer.File[],
+  ) {
+    const tenant = await prisma.tenant.findUnique({ where: { userId } });
+    if (!tenant) throw new Error('Tenant not found');
+
+    const existing = await prisma.property.findFirst({
+      where: { id: propertyId, tenantId: tenant.id },
+      include: { PropertyImages: true },
+    });
+
+    if (!existing) throw new Error('Property not found or access denied');
+
+    // Upload main image (if any)
+    const mainImageUrl = mainImage
+      ? (
+          await cloudinary.uploader.upload(mainImage.path, {
+            folder: 'properties/main',
+          })
+        ).secure_url
+      : existing.image;
+
+    // Upload gallery (if any)
+    let newGallery: { url: string }[] = [];
+    if (galleryImages?.length) {
+      const uploads = galleryImages.map((img) =>
+        cloudinary.uploader.upload(img.path, { folder: 'properties/gallery' }),
+      );
+      const results = await Promise.all(uploads);
+      newGallery = results.map((res) => ({ url: res.secure_url }));
+
+      await prisma.propertyImage.deleteMany({ where: { propertyId } });
+    }
+
+    // Hanya update field yang tidak kosong atau null
+    const sanitized = {
+      name: data.name?.trim() || existing.name,
+      categoryId: data.categoryId ?? existing.categoryId,
+      description: data.description?.trim() || existing.description,
+      address: data.address?.trim() || existing.address,
+      cityId: data.cityId ?? existing.cityId,
+      image: mainImageUrl,
+      ...(newGallery.length > 0 && {
+        PropertyImages: { create: newGallery },
+      }),
+    };
+
+    return prisma.property.update({
+      where: { id: propertyId },
+      data: sanitized,
+      include: { PropertyImages: true },
+    });
+  }
 }
