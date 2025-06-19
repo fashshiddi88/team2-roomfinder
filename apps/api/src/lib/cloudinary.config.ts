@@ -17,4 +17,24 @@ export const profileStorage = new CloudinaryStorage({
   }),
 });
 
+// Storage untuk main image properti
+export const mainImageStorage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => ({
+    folder: 'properties/main',
+    allowed_formats: ['jpg', 'jpeg', 'png'],
+    public_id: `main-${Date.now()}`,
+  }),
+});
+
+// Storage untuk gallery images properti
+export const galleryImageStorage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => ({
+    folder: 'properties/gallery',
+    allowed_formats: ['jpg', 'jpeg', 'png'],
+    public_id: `gallery-${Date.now()}-${file.originalname}`,
+  }),
+});
+
 export { cloudinary };

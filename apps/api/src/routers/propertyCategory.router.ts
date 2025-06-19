@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { PropertyCategoryController } from '@/controllers/propertyCategory.controller';
 import { AuthenticationMiddleware } from '@/middlewares/authentication.middleware';
 import { AuthorizationMiddleware } from '@/middlewares/authorization.middleware';
+import { ValidationMiddleware } from '@/middlewares/validation.middleware';
+import { propCategorySchema } from '@/lib/validations/validations.schema';
 
 export class PropertyCategoryRouter {
   public router: Router;
@@ -18,6 +20,7 @@ export class PropertyCategoryRouter {
       '/property-category',
       AuthenticationMiddleware.verifyToken,
       AuthorizationMiddleware.allowRoles('TENANT'),
+      ValidationMiddleware.validate(propCategorySchema),
       this.propertyCategoryController.createCategory.bind(
         this.propertyCategoryController,
       ),

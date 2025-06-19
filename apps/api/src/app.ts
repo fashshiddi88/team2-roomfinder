@@ -13,6 +13,7 @@ import { AuthRouter } from './routers/auth.router';
 import { OauthRouter } from './routers/oauth.router';
 import { ProfileRouter } from './routers/profile.router';
 import { PropertyCategoryRouter } from './routers/propertyCategory.router';
+import { PropertyRouter } from './routers/property.router';
 
 export default class App {
   private app: Express;
@@ -58,6 +59,7 @@ export default class App {
     this.app.use('/api', new OauthRouter().router);
     this.app.use('/api', new ProfileRouter().router);
     this.app.use('/api', new PropertyCategoryRouter().router);
+    this.app.use('/api', new PropertyRouter().router);
   }
 
   public start(): void {

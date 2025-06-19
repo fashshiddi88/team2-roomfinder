@@ -52,20 +52,45 @@ model PropertyCategory {
   properties Property[]
 }
 
+model Province {
+  id     Int    @id @default(autoincrement())
+  name   String @unique
+  cities City[]
+}
+
+model City {
+  id         Int        @id @default(autoincrement())
+  name       String
+  provinceId Int
+  province   Province   @relation(fields: [provinceId], references: [id])
+  properties Property[]
+}
+
 model Property {
   id          Int      @id @default(autoincrement())
   tenantId    Int
   categoryId  Int
   name        String
   description String?
-  location    String
+  cityId      Int
+  address     String
+  image       String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  tenant   Tenant           @relation(fields: [tenantId], references: [id])
-  category PropertyCategory @relation(fields: [categoryId], references: [id])
-  rooms    Room[]
-  bookings Booking[]
+  tenant         Tenant           @relation(fields: [tenantId], references: [id])
+  category       PropertyCategory @relation(fields: [categoryId], references: [id])
+  city           City             @relation(fields: [cityId], references: [id])
+  rooms          Room[]
+  bookings       Booking[]
+  PropertyImages PropertyImage[]
+}
+
+model PropertyImage {
+  id         Int      @id @default(autoincrement())
+  url        String
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id])
 }
 
 model Room {
@@ -73,6 +98,7 @@ model Room {
   propertyId  Int
   name        String
   description String?
+  image       String
   basePrice   Float
   capacity    Int
   createdAt   DateTime @default(now())

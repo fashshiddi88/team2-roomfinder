@@ -73,3 +73,25 @@ export const updatePasswordSchema = zod
     message: 'New password and confirm password must match',
     path: ['confirmNewPassword'],
   });
+
+export const propCategorySchema = {
+  body: zod.object({
+    name: zod.string().min(1, 'Category name is required'),
+  }),
+};
+
+export const createPropertySchema = {
+  body: zod.object({
+    name: zod.string().min(1, 'Name is required'),
+    categoryId: zod.coerce
+      .number()
+      .int()
+      .positive('Category ID must be a positive number'),
+    description: zod.string().optional(),
+    address: zod.string().min(1, 'Address is required'),
+    cityId: zod.coerce
+      .number()
+      .int()
+      .positive('City ID must be a positive number'),
+  }),
+};
