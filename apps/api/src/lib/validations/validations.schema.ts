@@ -95,3 +95,17 @@ export const createPropertySchema = {
       .positive('City ID must be a positive number'),
   }),
 };
+
+export const createRoomSchema = {
+  body: zod.object({
+    name: zod.string().min(1, { message: 'Room name is required' }),
+    description: zod.string().optional(),
+    basePrice: zod.coerce
+      .number()
+      .positive({ message: 'Base price must be a positive number' }),
+    capacity: zod.coerce
+      .number()
+      .int()
+      .positive({ message: 'Capacity must be a positive integer' }),
+  }),
+};

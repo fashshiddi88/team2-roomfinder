@@ -1,5 +1,5 @@
 import multer from 'multer';
-import { profileStorage } from '@/lib/cloudinary.config';
+import { profileStorage, roomStorage } from '@/lib/cloudinary.config';
 
 export const uploadProfileImage = multer({
   storage: profileStorage,
@@ -20,3 +20,10 @@ export const uploadFields = uploadPropertyImages.fields([
   { name: 'mainImage', maxCount: 1 },
   { name: 'galleryImages', maxCount: 10 }, // boleh disesuaikan jumlah maksimal
 ]);
+
+export const uploadRoomImage = multer({
+  storage: roomStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+});

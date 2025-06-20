@@ -14,6 +14,7 @@ import { OauthRouter } from './routers/oauth.router';
 import { ProfileRouter } from './routers/profile.router';
 import { PropertyCategoryRouter } from './routers/propertyCategory.router';
 import { PropertyRouter } from './routers/property.router';
+import { RoomRouter } from './routers/room.router';
 
 export default class App {
   private app: Express;
@@ -60,6 +61,7 @@ export default class App {
     this.app.use('/api', new ProfileRouter().router);
     this.app.use('/api', new PropertyCategoryRouter().router);
     this.app.use('/api', new PropertyRouter().router);
+    this.app.use('/api', new RoomRouter().router);
   }
 
   public start(): void {

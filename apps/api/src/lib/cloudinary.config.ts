@@ -11,7 +11,7 @@ export const profileStorage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => ({
     folder: 'profile-images',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'gif'],
+    allowed_formats: ['jpg', 'jpeg', 'png'],
     transformation: [{ width: 500, height: 500, crop: 'limit' }],
     public_id: `profile-${Date.now()}`,
   }),
@@ -34,6 +34,15 @@ export const galleryImageStorage = new CloudinaryStorage({
     folder: 'properties/gallery',
     allowed_formats: ['jpg', 'jpeg', 'png'],
     public_id: `gallery-${Date.now()}-${file.originalname}`,
+  }),
+});
+
+export const roomStorage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => ({
+    folder: 'rooms',
+    allowed_formats: ['jpg', 'jpeg', 'png'],
+    public_id: `room-${Date.now()}`,
   }),
 });
 

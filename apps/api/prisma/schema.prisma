@@ -95,15 +95,16 @@ model PropertyImage {
 }
 
 model Room {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   propertyId  Int
   name        String
   description String?
   image       String
   basePrice   Float
   capacity    Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 
   property       Property           @relation(fields: [propertyId], references: [id])
   availabilities RoomAvailability[]
