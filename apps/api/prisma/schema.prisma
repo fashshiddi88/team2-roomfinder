@@ -67,7 +67,7 @@ model City {
 }
 
 model Property {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   tenantId    Int
   categoryId  Int
   name        String
@@ -75,8 +75,9 @@ model Property {
   cityId      Int
   address     String
   image       String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 
   tenant         Tenant           @relation(fields: [tenantId], references: [id])
   category       PropertyCategory @relation(fields: [categoryId], references: [id])

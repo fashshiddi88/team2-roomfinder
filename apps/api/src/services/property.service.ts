@@ -137,4 +137,92 @@ export class PropertyService {
       include: { PropertyImages: true },
     });
   }
+
+  async softDeleteProperty(propertyId: number, userId: number) {
+    const tenant = await prisma.tenant.findUnique({ where: { userId } });
+    if (!tenant) throw new Error('Tenant not found');
+
+    const existing = await prisma.property.findFirst({
+      where: {
+        id: propertyId,
+        tenantId: tenant.id,
+        deletedAt: null,
+      },
+    });
+
+    if (!existing) throw new Error('Property not found or access denied');
+
+    await prisma.property.update({
+      where: { id: propertyId },
+      data: { deletedAt: new Date() },
+    });
+
+    return { message: 'Property successfully soft-deleted' };
+  }
+
+  async hardDeleteProperty(propertyId: number, userId: number) {
+    const tenant = await prisma.tenant.findUnique({ where: { userId } });
+    if (!tenant) throw new Error('Tenant not found');
+
+    const existing = await prisma.property.findFirst({
+      where: {
+        id: propertyId,
+        tenantId: tenant.id,
+      },
+    });
+
+    if (!existing) throw new Error('Property not found or access denied');
+
+    // Hapus gambar-gambar terlebih dahulu
+    await prisma.propertyImage.deleteMany({
+      where: { propertyId },
+    });
+
+    // Hapus properti
+    await prisma.property.delete({
+      where: { id: propertyId },
+    });
+
+    return { message: 'Property permanently deleted' };
+  }
+
+  async restoreProperty(propertyId: number, userId: number) {
+    const tenant = await prisma.tenant.findUnique({ where: { userId } });
+    if (!tenant) throw new Error('Tenant not found');
+
+    const property = await prisma.property.findFirst({
+      where: {
+        id: propertyId,
+        tenantId: tenant.id,
+        deletedAt: { not: null },
+      },
+    });
+
+    if (!property)
+      throw new Error('Property not found or not eligible for restore');
+
+    await prisma.property.update({
+      where: { id: propertyId },
+      data: { deletedAt: null },
+    });
+
+    return { message: 'Property successfully restored' };
+  }
+
+  async getTenantProperties(userId: number) {
+    const tenant = await prisma.tenant.findUnique({ where: { userId } });
+    if (!tenant) throw new Error('Tenant not found');
+
+    return prisma.property.findMany({
+      where: { tenantId: tenant.id, deletedAt: null },
+      include: {
+        rooms: true,
+        PropertyImages: true,
+        category: true,
+        city: {
+          include: { province: true },
+        },
+      },
+    });
+  }
 }

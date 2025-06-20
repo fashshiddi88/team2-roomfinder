@@ -32,5 +32,31 @@ export class PropertyRouter {
       uploadFields,
       this.propertyController.updateProperty.bind(this.propertyController),
     );
+    this.router.delete(
+      '/property/:id',
+      AuthenticationMiddleware.verifyToken,
+      AuthorizationMiddleware.allowRoles('TENANT'),
+      this.propertyController.softDeleteProperty.bind(this.propertyController),
+    );
+
+    this.router.delete(
+      '/property/hard-delete/:id',
+      AuthenticationMiddleware.verifyToken,
+      AuthorizationMiddleware.allowRoles('TENANT'),
+      this.propertyController.hardDeleteProperty.bind(this.propertyController),
+    );
+    this.router.patch(
+      '/property/restore/:id',
+      AuthenticationMiddleware.verifyToken,
+      AuthorizationMiddleware.allowRoles('TENANT'),
+      this.propertyController.restoreProperty.bind(this.propertyController),
+    );
+
+    this.router.get(
+      '/property/my-properties',
+      AuthenticationMiddleware.verifyToken,
+      AuthorizationMiddleware.allowRoles('TENANT'),
+      this.propertyController.getTenantProperties.bind(this.propertyController),
+    );
   }
 }

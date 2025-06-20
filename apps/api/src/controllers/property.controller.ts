@@ -100,4 +100,101 @@ export class PropertyController {
       return res.status(500).json({ message: err.message });
     }
   }
+
+  async softDeleteProperty(req: Request, res: Response) {
+    try {
+      const tenant = (req as any).user;
+      if (!tenant || tenant.role !== 'TENANT') {
+        return res
+          .status(403)
+          .json({ message: 'Forbidden: Only tenants can delete properties' });
+      }
+
+      const propertyId = Number(req.params.id);
+      if (isNaN(propertyId)) {
+        return res.status(400).json({ message: 'Invalid property ID' });
+      }
+
+      const result = await this.propertyService.softDeleteProperty(
+        propertyId,
+        tenant.userId,
+      );
+
+      return res.status(200).json(result);
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async hardDeleteProperty(req: Request, res: Response) {
+    try {
+      const tenant = (req as any).user;
+      if (!tenant || tenant.role !== 'TENANT') {
+        return res
+          .status(403)
+          .json({ message: 'Forbidden: Only tenants can delete properties' });
+      }
+
+      const propertyId = Number(req.params.id);
+      if (isNaN(propertyId)) {
+        return res.status(400).json({ message: 'Invalid property ID' });
+      }
+
+      const result = await this.propertyService.hardDeleteProperty(
+        propertyId,
+        tenant.userId,
+      );
+
+      return res.status(200).json(result);
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async restoreProperty(req: Request, res: Response) {
+    try {
+      const tenant = (req as any).user;
+      if (!tenant || tenant.role !== 'TENANT') {
+        return res.status(403).json({
+          message: 'Forbidden: Only tenants can restore properties',
+        });
+      }
+
+      const propertyId = Number(req.params.id);
+      if (isNaN(propertyId)) {
+        return res.status(400).json({ message: 'Invalid property ID' });
+      }
+
+      const result = await this.propertyService.restoreProperty(
+        propertyId,
+        tenant.userId,
+      );
+
+      return res.status(200).json(result);
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async getTenantProperties(req: Request, res: Response) {
+    try {
+      const tenant = (req as any).user;
+      if (!tenant || tenant.role !== 'TENANT') {
+        return res
+          .status(403)
+          .json({ message: 'Forbidden: Only tenants can view this data' });
+      }
+
+      const properties = await this.propertyService.getTenantProperties(
+        tenant.userId,
+      );
+
+      return res.status(200).json({
+        message: 'Properties fetched successfully',
+        data: properties,
+      });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
 }
