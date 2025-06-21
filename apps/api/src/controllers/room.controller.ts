@@ -23,7 +23,7 @@ export class RoomController {
         return res.status(400).json({ message: 'Invalid property ID' });
       }
 
-      const { name, description, basePrice, capacity } = req.body;
+      const { name, description, qty, basePrice, capacity } = req.body;
       const image = req.file;
 
       if (!image) {
@@ -36,6 +36,7 @@ export class RoomController {
         {
           name,
           description,
+          qty: Number(qty),
           basePrice: Number(basePrice),
           capacity: Number(capacity),
         },
@@ -64,7 +65,7 @@ export class RoomController {
         return res.status(400).json({ message: 'Invalid property or room ID' });
       }
 
-      const { name, description, basePrice, capacity } = req.body;
+      const { name, description, qty, basePrice, capacity } = req.body;
       const image = req.file;
 
       const updatedRoom = await this.roomService.updateRoom(
@@ -73,6 +74,7 @@ export class RoomController {
         {
           name,
           description,
+          qty: qty ? Number(qty) : undefined,
           basePrice: basePrice ? Number(basePrice) : undefined,
           capacity: capacity ? Number(capacity) : undefined,
         },

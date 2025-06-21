@@ -7,6 +7,7 @@ export class RoomService {
     data: {
       name: string;
       description?: string;
+      qty: number;
       basePrice: number;
       capacity: number;
     },
@@ -30,6 +31,7 @@ export class RoomService {
         propertyId,
         name: data.name,
         description: data.description,
+        qty: data.qty,
         basePrice: data.basePrice,
         capacity: data.capacity,
         image: image.path,
@@ -45,6 +47,7 @@ export class RoomService {
     data: {
       name?: string;
       description?: string;
+      qty?: number;
       basePrice?: number;
       capacity?: number;
     },
@@ -75,6 +78,7 @@ export class RoomService {
           data.description !== undefined && data.description.trim() !== ''
             ? data.description
             : room.description,
+        qty: data.qty !== undefined ? data.qty : room.qty,
         basePrice:
           data.basePrice !== undefined ? data.basePrice : room.basePrice,
         capacity: data.capacity !== undefined ? data.capacity : room.capacity,

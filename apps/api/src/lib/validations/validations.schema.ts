@@ -100,6 +100,9 @@ export const createRoomSchema = {
   body: zod.object({
     name: zod.string().min(1, { message: 'Room name is required' }),
     description: zod.string().optional(),
+    qty: zod.coerce
+      .number()
+      .positive({ message: 'Quantity must be a positive number' }),
     basePrice: zod.coerce
       .number()
       .positive({ message: 'Base price must be a positive number' }),
@@ -107,5 +110,20 @@ export const createRoomSchema = {
       .number()
       .int()
       .positive({ message: 'Capacity must be a positive integer' }),
+  }),
+};
+
+export const peakSeasonRateSchema = {
+  body: zod.object({
+    startDate: zod.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: 'Invalid start date',
+    }),
+    endDate: zod.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: 'Invalid end date',
+    }),
+    priceModifierType: zod.enum(['PERCENTAGE', 'FIXED']),
+    priceModifierValue: zod.number().min(0, {
+      message: 'Price modifier must be a positive number',
+    }),
   }),
 };
