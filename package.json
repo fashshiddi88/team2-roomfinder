@@ -36,6 +36,7 @@
   "dependencies": {
     "@types/axios": "^0.14.0",
     "axios": "^1.7.2",
+    "ecdsa-sig-formatter": "^1.0.11",
     "lucide-react": "^0.515.0",
     "react-datepicker": "^8.4.0",
     "react-icons": "^5.5.0"
