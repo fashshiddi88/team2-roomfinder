@@ -44,7 +44,7 @@ export class CatalogService {
                 availabilities: {
                   some: {
                     date: { gte: startDate, lte: endDate },
-                    isAvailable: false,
+                    available: 0,
                   },
                 },
               }
@@ -63,7 +63,7 @@ export class CatalogService {
     function getDateRange(start: Date, end: Date): Date[] {
       const dates: Date[] = [];
       const current = new Date(start);
-      while (current < end) {
+      while (current <= end) {
         dates.push(new Date(current));
         current.setDate(current.getDate() + 1);
       }

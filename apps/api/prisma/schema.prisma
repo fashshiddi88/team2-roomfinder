@@ -114,12 +114,12 @@ model Room {
 }
 
 model RoomAvailability {
-  id          Int      @id @default(autoincrement())
-  roomId      Int
-  date        DateTime
-  isAvailable Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  roomId    Int
+  date      DateTime
+  available Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   room Room @relation(fields: [roomId], references: [id])
 

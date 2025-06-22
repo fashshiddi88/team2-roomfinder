@@ -6,7 +6,7 @@ export class RoomAvailabilityService {
     roomId: number,
 
     date: string,
-    isAvailable: boolean,
+    available: number,
   ) {
     // Pastikan tenant valid
     console.log('UserID from token:', userId);
@@ -30,11 +30,11 @@ export class RoomAvailabilityService {
           date: new Date(date),
         },
       },
-      update: { isAvailable },
+      update: { available },
       create: {
         roomId,
         date: new Date(date),
-        isAvailable,
+        available,
       },
     });
 

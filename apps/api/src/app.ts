@@ -18,6 +18,7 @@ import { RoomRouter } from './routers/room.router';
 import { RoomAvailabilityRouter } from './routers/roomAvailability.router';
 import { PeakSeasonRateRouter } from './routers/peakSeasonRate.router';
 import { CatalogRouter } from './routers/catalog.router';
+import { PropertyExploreRouter } from './routers/propertyExplore.router';
 
 export default class App {
   private app: Express;
@@ -68,6 +69,7 @@ export default class App {
     this.app.use('/api', new RoomAvailabilityRouter().router);
     this.app.use('/api', new PeakSeasonRateRouter().router);
     this.app.use('/api', new CatalogRouter().router);
+    this.app.use('/api', new PropertyExploreRouter().router);
   }
 
   public start(): void {
