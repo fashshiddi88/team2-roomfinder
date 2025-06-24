@@ -46,4 +46,13 @@ export const roomStorage = new CloudinaryStorage({
   }),
 });
 
+export const paymentProofStorage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => ({
+    folder: 'booking_payment_proofs',
+    allowed_formats: ['jpg', 'png'],
+    public_id: `proof-${Date.now()}`,
+  }),
+});
+
 export { cloudinary };

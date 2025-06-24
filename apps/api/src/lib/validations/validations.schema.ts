@@ -127,3 +127,39 @@ export const peakSeasonRateSchema = {
     }),
   }),
 };
+
+export const bookingSchema = {
+  body: zod
+    .object({
+      propertyId: zod.number({
+        required_error: 'Property ID is required',
+        invalid_type_error: 'Property ID must be a number',
+      }),
+      roomId: zod.number({
+        required_error: 'Room ID is required',
+        invalid_type_error: 'Room ID must be a number',
+      }),
+      startDate: zod.preprocess(
+        (arg) => {
+          const date = new Date(arg as string);
+          return isNaN(date.getTime()) ? undefined : date;
+        },
+        zod.date({ required_error: 'Start date is required' }),
+      ),
+      endDate: zod.preprocess(
+        (arg) => {
+          const date = new Date(arg as string);
+          return isNaN(date.getTime()) ? undefined : date;
+        },
+        zod.date({ required_error: 'End date is required' }),
+      ),
+      bookingType: zod.enum(['MANUAL', 'GATEWAY'], {
+        required_error: 'Booking type is required',
+      }),
+      name: zod.string().optional(),
+    })
+    .refine((data) => data.startDate < data.endDate, {
+      message: 'End date must be after start date',
+      path: ['endDate'],
+    }),
+};

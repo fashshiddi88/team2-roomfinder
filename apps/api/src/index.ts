@@ -1,4 +1,5 @@
 import App from './app';
+import { startTransactionStatusJob } from './cron/jobs/transactionJobs';
 
 const main = () => {
   // init db here
@@ -7,4 +8,5 @@ const main = () => {
   app.start();
 };
 
+startTransactionStatusJob();
 main();
