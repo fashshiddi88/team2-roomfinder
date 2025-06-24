@@ -163,3 +163,28 @@ export const bookingSchema = {
       path: ['endDate'],
     }),
 };
+
+export const snapRequestSchema = {
+  body: zod.object({
+    transaction_details: zod.object({
+      order_id: zod.string().min(1, 'Order ID is required'),
+      gross_amount: zod.number().positive('Amount must be greater than 0'),
+    }),
+    customer_details: zod
+      .object({
+        first_name: zod.string(),
+        email: zod.string().email(),
+      })
+      .optional(),
+    item_details: zod
+      .array(
+        zod.object({
+          id: zod.string(),
+          name: zod.string(),
+          price: zod.number().positive(),
+          quantity: zod.number().int().positive(),
+        }),
+      )
+      .optional(),
+  }),
+};

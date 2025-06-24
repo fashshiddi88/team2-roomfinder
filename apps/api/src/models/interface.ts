@@ -13,3 +13,26 @@ export interface UserPayLoad {
   role: 'USER' | 'TENANT';
   purpose?: 'verify' | 'access';
 }
+
+export interface TransactionDetails {
+  order_id: string;
+  gross_amount: number;
+}
+
+export interface CustomerDetails {
+  first_name: string;
+  email: string;
+}
+
+export interface ItemDetails {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+export interface SnapRequest {
+  transaction_details: TransactionDetails;
+  customer_details?: CustomerDetails;
+  item_details?: ItemDetails[];
+}

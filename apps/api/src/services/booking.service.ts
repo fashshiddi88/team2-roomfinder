@@ -2,8 +2,11 @@ import { prisma } from '@/prisma/client';
 import { generateOrderNumber } from '@/lib/utils/generateOrderNumber';
 import { BookingStatus } from '@prisma/client';
 import { restoreResources } from '@/lib/utils/restoreResource';
+import { SnapRequest, ItemDetails } from '@/models/interface';
+import { MidtransService } from './midtrans.service';
 
 export class BookingService {
+  constructor(private midtransService: MidtransService) {}
   async createBooking(data: {
     userId: number;
     propertyId: number;
@@ -45,6 +48,7 @@ export class BookingService {
 
     // Hitung total price
     let totalPrice = 0;
+    const pricePerDay: number[] = [];
 
     for (const day of days) {
       let price = room.basePrice;
@@ -60,6 +64,7 @@ export class BookingService {
       }
 
       totalPrice += price;
+      pricePerDay.push(Math.round(price));
     }
 
     // Validasi dan update nama user jika kosong
@@ -147,6 +152,35 @@ export class BookingService {
 
       return createdBooking;
     });
+
+    // 2. Jika GATEWAY
+    let paymentUrl: string | undefined;
+
+    const itemDetails: ItemDetails[] = days.map((day, index) => ({
+      id: `${room.id}-${index}`,
+      name: `Room ${room.name} - ${day.toISOString().split('T')[0]}`,
+      price: pricePerDay[index],
+      quantity: 1,
+    }));
+    const grossAmount = itemDetails.reduce((acc, item) => acc + item.price, 0);
+
+    if (bookingType === 'GATEWAY') {
+      const payload: SnapRequest = {
+        transaction_details: {
+          order_id: booking.orderNumber,
+          gross_amount: grossAmount,
+        },
+        customer_details: {
+          first_name: user.name || 'Guest',
+          email: user.email,
+        },
+        item_details: itemDetails,
+      };
+
+      paymentUrl = await this.midtransService.createSnapTransaction(payload);
+    }
+
+    return { booking, paymentUrl };
   }
 
   public async uploadPaymentProof({

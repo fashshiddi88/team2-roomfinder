@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
 import { BookingService } from '@/services/booking.service';
 import { BookingStatus } from '@prisma/client';
+import { MidtransService } from '@/services/midtrans.service';
 
 export class BookingController {
   private bookingService: BookingService;
 
   constructor() {
-    this.bookingService = new BookingService();
+    const midtransService = new MidtransService();
+    this.bookingService = new BookingService(midtransService);
   }
 
   async createBooking(req: Request, res: Response) {

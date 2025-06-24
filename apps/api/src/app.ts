@@ -20,6 +20,7 @@ import { PeakSeasonRateRouter } from './routers/peakSeasonRate.router';
 import { CatalogRouter } from './routers/catalog.router';
 import { PropertyExploreRouter } from './routers/propertyExplore.router';
 import { BookingRouter } from './routers/booking.router';
+import { MidtransRouter } from './routers/midtrans.router';
 
 export default class App {
   private app: Express;
@@ -72,6 +73,7 @@ export default class App {
     this.app.use('/api', new CatalogRouter().router);
     this.app.use('/api', new PropertyExploreRouter().router);
     this.app.use('/api', new BookingRouter().router);
+    this.app.use('/api', new MidtransRouter().router);
   }
 
   public start(): void {
