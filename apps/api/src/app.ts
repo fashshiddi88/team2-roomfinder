@@ -21,6 +21,7 @@ import { CatalogRouter } from './routers/catalog.router';
 import { PropertyExploreRouter } from './routers/propertyExplore.router';
 import { BookingRouter } from './routers/booking.router';
 import { MidtransRouter } from './routers/midtrans.router';
+import { DashboardRouter } from './routers/dashboard.router';
 
 export default class App {
   private app: Express;
@@ -74,6 +75,7 @@ export default class App {
     this.app.use('/api', new PropertyExploreRouter().router);
     this.app.use('/api', new BookingRouter().router);
     this.app.use('/api', new MidtransRouter().router);
+    this.app.use('/api', new DashboardRouter().router);
   }
 
   public start(): void {
