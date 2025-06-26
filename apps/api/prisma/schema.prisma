@@ -85,6 +85,7 @@ model Property {
   rooms          Room[]
   bookings       Booking[]
   PropertyImages PropertyImage[]
+  reviews        Review[]
 }
 
 model PropertyImage {
@@ -180,14 +181,16 @@ model Review {
   id          Int      @id @default(autoincrement())
   bookingId   Int      @unique
   userId      Int
+  propertyId  Int
   rating      Int?
   comment     String
   tenantReply String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  booking Booking @relation(fields: [bookingId], references: [id])
-  user    User    @relation(fields: [userId], references: [id])
+  booking  Booking  @relation(fields: [bookingId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id])
 }
 
 enum Role {

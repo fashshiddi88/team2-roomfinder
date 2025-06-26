@@ -22,6 +22,9 @@ import { PropertyExploreRouter } from './routers/propertyExplore.router';
 import { BookingRouter } from './routers/booking.router';
 import { MidtransRouter } from './routers/midtrans.router';
 import { DashboardRouter } from './routers/dashboard.router';
+import { ReviewRouter } from './routers/review.router';
+import { ReportController } from './controllers/report.controller';
+import { ReportRouter } from './routers/report.router';
 
 export default class App {
   private app: Express;
@@ -76,6 +79,8 @@ export default class App {
     this.app.use('/api', new BookingRouter().router);
     this.app.use('/api', new MidtransRouter().router);
     this.app.use('/api', new DashboardRouter().router);
+    this.app.use('/api', new ReviewRouter().router);
+    this.app.use('/api', new ReportRouter().router);
   }
 
   public start(): void {
