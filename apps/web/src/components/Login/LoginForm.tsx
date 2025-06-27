@@ -87,16 +87,13 @@ export default function LoginForm() {
           <hr className="flex-grow border-t" />
         </div>
 
-        <div className="flex space-x-4">
-          <button className="flex items-center justify-center w-1/2 border rounded py-2 hover:bg-gray-50">
-            <FaFacebook className="mr-2 text-blue-600" />
-            Facebook
-          </button>
-          <button className="flex items-center justify-center w-1/2 border rounded py-2 hover:bg-gray-50">
-            <FaGoogle className="mr-2 text-red-600" />
-            Google
+        <div className="flex">
+          <button className="flex items-center justify-center w-full border rounded py-2 hover:bg-gray-50">
+            <FaGoogle className="mr-2 text-red-600 text-lg" />
+            <span className="text-sm font-medium">Google</span>
           </button>
         </div>
+
       </div>
     </div>
   );

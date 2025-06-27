@@ -9,13 +9,14 @@ export default function TenantAddPropertyPage() {
 
   const [form, setForm] = useState({
     name: '',
-    category: '',
-    location: '',
-    price: '',
-    status: 'Available',
-    image: '',
+    categoryId: '',
     description: '',
+    address: '',
+    cityId: '',
   });
+
+  const [mainImage, setMainImage] = useState<File | null>(null);
+  const [galleryImages, setGalleryImages] = useState<FileList | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -24,20 +25,38 @@ export default function TenantAddPropertyPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validasi sederhana
-    if (!form.name || !form.category || !form.price) {
-      alert('Please fill out required fields');
-      return;
+    const data = new FormData();
+    Object.entries(form).forEach(([key, value]) => {
+      data.append(key, value);
+    });
+
+    if (mainImage) {
+      data.append('mainImage', mainImage);
     }
 
-    // Kirim data (sementara log saja)
-    console.log('Property Data:', form);
+    if (galleryImages) {
+      Array.from(galleryImages).forEach((file) => {
+        data.append('galleryImages', file);
+      });
+    }
 
-    // Redirect (atau tampilkan notifikasi)
-    router.push('/Tenant_Property');
+    try {
+      const res = await fetch('http://localhost:8000/api/property', {
+        method: 'POST',
+        body: data,
+      });
+
+      if (!res.ok) throw new Error('Failed to submit');
+
+      alert('Property created successfully!');
+      router.push('/Tenant_Property');
+    } catch (err) {
+      alert('Failed to create property');
+      console.error(err);
+    }
   };
 
   return (
@@ -48,7 +67,7 @@ export default function TenantAddPropertyPage() {
         <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow">
           <h2 className="text-2xl font-bold mb-6">Add New Property</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5" encType="multipart/form-data">
             <div>
               <label className="block font-medium mb-1">Property Name *</label>
               <input
@@ -62,63 +81,37 @@ export default function TenantAddPropertyPage() {
             </div>
 
             <div>
-              <label className="block font-medium mb-1">Category *</label>
-              <select
-                name="category"
-                value={form.category}
+              <label className="block font-medium mb-1">Category  *</label>
+              <input
+                type="text"
+                name="categoryId"
+                value={form.categoryId}
                 onChange={handleChange}
                 required
                 className="w-full border p-2 rounded"
-              >
-                <option value="">Select</option>
-                <option value="Villa">Villa</option>
-                <option value="Apartment">Apartment</option>
-                <option value="House">House</option>
-              </select>
+              />
             </div>
 
             <div>
-              <label className="block font-medium mb-1">Location</label>
+              <label className="block font-medium mb-1">City*</label>
               <input
                 type="text"
-                name="location"
-                value={form.location}
+                name="cityId"
+                value={form.cityId}
                 onChange={handleChange}
+                required
                 className="w-full border p-2 rounded"
               />
             </div>
 
             <div>
-              <label className="block font-medium mb-1">Price per Night (Rp)</label>
-              <input
-                type="number"
-                name="price"
-                value={form.price}
-                onChange={handleChange}
-                className="w-full border p-2 rounded"
-              />
-            </div>
-
-            <div>
-              <label className="block font-medium mb-1">Status</label>
-              <select
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                className="w-full border p-2 rounded"
-              >
-                <option value="Available">Available</option>
-                <option value="Not Available">Not Available</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block font-medium mb-1">Image URL</label>
+              <label className="block font-medium mb-1">Address *</label>
               <input
                 type="text"
-                name="image"
-                value={form.image}
+                name="address"
+                value={form.address}
                 onChange={handleChange}
+                required
                 className="w-full border p-2 rounded"
               />
             </div>
@@ -132,6 +125,28 @@ export default function TenantAddPropertyPage() {
                 rows={4}
                 className="w-full border p-2 rounded"
               ></textarea>
+            </div>
+
+            <div>
+              <label className="block font-medium mb-1">Main Image *</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setMainImage(e.target.files?.[0] || null)}
+                required
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <label className="block font-medium mb-1">Gallery Images (multiple)</label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => setGalleryImages(e.target.files)}
+                className="w-full"
+              />
             </div>
 
             <div className="flex justify-end">

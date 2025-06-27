@@ -27,7 +27,7 @@ export default function Navbar() {
         </Link>
 
         {/* Navigation Links */}
-        <nav className="hidden md:flex space-x-10">
+        {/* <nav className="hidden md:flex space-x-10">
           {['Home', 'Features', 'Recomendations', 'About Us'].map((item) => (
             <Link
               key={item}
@@ -37,12 +37,12 @@ export default function Navbar() {
               {item}
             </Link>
           ))}
-        </nav>
+        </nav> */}
 
         {/* Action Buttons */}
         <div className="flex items-center space-x-4">
           <Link
-            href="/become-a-tenant"
+            href="/Register_Tenant"
             className="bg-black text-white px-5 py-2 rounded-lg hover:bg-yellow-600 transition-colors font-semibold"
           >
             Become a Tenant

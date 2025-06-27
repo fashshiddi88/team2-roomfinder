@@ -7,13 +7,13 @@ import { FcGoogle } from 'react-icons/fc';
 
 export default function RegisterForm() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!email) return;
-    alert(`Register dengan email: ${email}`);
-    router.push('/login'); // Simulasi
+    if (!password) return;
+    alert(`Register Succcess`);
+    router.push('/Login'); // Simulasi
   };
 
   return (
@@ -22,14 +22,14 @@ export default function RegisterForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
+              Password
             </label>
             <input
-              type="email"
-              id="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="password"
+              id="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -43,28 +43,10 @@ export default function RegisterForm() {
           </button>
         </form>
 
-        {/* Divider */}
-        <div className="flex items-center my-4">
-          <div className="flex-grow h-px bg-gray-300" />
-          <span className="px-2 text-sm text-gray-500">register with google</span>
-          <div className="flex-grow h-px bg-gray-300" />
-        </div>
 
-        {/* Google Button */}
-        <button
-          className="w-full flex items-center justify-center border border-gray-300 rounded-md py-2 hover:bg-gray-50"
-        >
-          <FcGoogle className="mr-2 text-xl" />
-          Google
-        </button>
 
-        {/* Footer Link */}
-        <p className="text-center text-sm text-gray-600 mt-4">
-          Already have an account?{' '}
-          <Link href="/Login" className="text-blue-600 hover:underline">
-            Sign in
-          </Link>
-        </p>
+
+
       </div>
     </div>
   );
