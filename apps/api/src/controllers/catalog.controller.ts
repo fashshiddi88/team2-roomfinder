@@ -16,6 +16,7 @@ export class CatalogController {
         sortOrder,
         page = '1',
         pageSize = '10',
+        capacity: cap,
         startDate: start,
         endDate: end,
       } = req.query;
@@ -23,6 +24,7 @@ export class CatalogController {
       const numericPage = Number(page);
       const numericPageSize = Number(pageSize);
 
+      const capacity = cap ? Number(cap) : undefined;
       const startDate = start ? new Date(start as string) : undefined;
       const endDate = end ? new Date(end as string) : undefined;
 
@@ -45,6 +47,8 @@ export class CatalogController {
         sortOrder: sortOrder as 'asc' | 'desc',
         page: numericPage,
         pageSize: numericPageSize,
+        capacity,
+
         startDate,
         endDate,
         days,
@@ -59,6 +63,19 @@ export class CatalogController {
       });
     } catch (err: any) {
       return res.status(500).json({ message: err.message });
+    }
+  }
+
+  public async getAllCities(req: Request, res: Response) {
+    try {
+      const cities = await this.catalogService.getAllCities();
+      res
+        .status(200)
+        .json({ message: 'Cities fetched successfully', data: cities });
+    } catch (err: any) {
+      res
+        .status(500)
+        .json({ message: 'Failed to fetch cities', error: err.message });
     }
   }
 }

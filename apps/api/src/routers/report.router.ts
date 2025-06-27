@@ -26,5 +26,11 @@ export class ReportRouter {
       AuthorizationMiddleware.allowRoles('TENANT'),
       this.reportController.getPropertyReport.bind(this.reportController),
     );
+    this.router.get(
+      '/dashboard/monthly-income',
+      AuthenticationMiddleware.verifyToken,
+      AuthorizationMiddleware.allowRoles('TENANT'),
+      this.reportController.getMonthlyIncomeReport.bind(this.reportController),
+    );
   }
 }

@@ -30,5 +30,11 @@ export class PropertyExploreRouter {
         this.propertyExploreController,
       ),
     );
+    this.router.get(
+      '/property-detail/:propertyId/prices/calendar',
+      this.propertyExploreController.getRoomPricesTwoMonths.bind(
+        this.propertyExploreController,
+      ),
+    );
   }
 }

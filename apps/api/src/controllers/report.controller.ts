@@ -62,4 +62,30 @@ export class ReportController {
       });
     }
   }
+
+  public async getMonthlyIncomeReport(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user?.userId;
+
+      const year = req.query.year ? Number(req.query.year) : undefined;
+      const month = req.query.month ? Number(req.query.month) : undefined;
+
+      const report = await this.reportService.getMonthlyIncomeReport(
+        userId,
+        year,
+        month,
+      );
+
+      return res.status(200).json({
+        message: 'Monthly income report fetched successfully',
+        detail: report,
+      });
+    } catch (error: any) {
+      console.error('[Monthly Income Report Error]', error);
+      return res.status(500).json({
+        message: 'Failed to fetch monthly income report',
+        detail: error.message,
+      });
+    }
+  }
 }
