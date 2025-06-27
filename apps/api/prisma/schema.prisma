@@ -29,6 +29,7 @@ model User {
   tenant   Tenant?
   bookings Booking[]
   reviews  Review[]
+  wishlist Wishlist[]
 }
 
 model Tenant {
@@ -86,6 +87,7 @@ model Property {
   bookings       Booking[]
   PropertyImages PropertyImage[]
   reviews        Review[]
+  wishlist       Wishlist[]
 }
 
 model PropertyImage {
@@ -191,6 +193,18 @@ model Review {
   booking  Booking  @relation(fields: [bookingId], references: [id])
   user     User     @relation(fields: [userId], references: [id])
   property Property @relation(fields: [propertyId], references: [id])
+}
+
+model Wishlist {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  propertyId Int
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id])
+
+  @@unique([userId, propertyId]) // Agar satu user tidak menyimpan properti yang sama lebih dari sekali
 }
 
 enum Role {
