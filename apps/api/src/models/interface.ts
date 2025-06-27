@@ -30,9 +30,15 @@ export interface ItemDetails {
   price: number;
   quantity: number;
 }
+export interface Expiry {
+  start_time: string;
+  unit: 'minutes' | 'hours' | 'days';
+  duration: number;
+}
 
 export interface SnapRequest {
   transaction_details: TransactionDetails;
   customer_details?: CustomerDetails;
   item_details?: ItemDetails[];
+  expiry?: Expiry;
 }

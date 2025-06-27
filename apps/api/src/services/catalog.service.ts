@@ -8,6 +8,7 @@ export class CatalogService {
     sortOrder?: 'asc' | 'desc';
     page?: number;
     pageSize?: number;
+    capacity?: number;
     startDate?: Date;
     endDate?: Date;
     days?: Date[];
@@ -19,6 +20,7 @@ export class CatalogService {
       sortOrder = 'asc',
       page = 1,
       pageSize = 10,
+      capacity,
       startDate,
       endDate,
     } = query;
@@ -28,6 +30,9 @@ export class CatalogService {
     const rooms = await prisma.room.findMany({
       where: {
         deletedAt: null,
+        capacity: {
+          gte: capacity || undefined,
+        },
         property: {
           deletedAt: null,
           categoryId: categoryId || undefined,
@@ -159,5 +164,13 @@ export class CatalogService {
       totalPages,
       currentPage: page,
     };
+  }
+
+  public async getAllCities() {
+    const cities = await prisma.city.findMany({
+      orderBy: { name: 'asc' },
+    });
+
+    return cities;
   }
 }

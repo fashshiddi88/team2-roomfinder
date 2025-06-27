@@ -95,4 +95,21 @@ export class PropertyExploreController {
       return res.status(500).json({ message: err.message });
     }
   }
+  public async getRoomPricesTwoMonths(req: Request, res: Response) {
+    try {
+      const propertyId = Number(req.params.propertyId);
+      if (isNaN(propertyId)) {
+        return res.status(400).json({ message: 'Invalid property ID' });
+      }
+
+      const result =
+        await this.propertyExploreService.getRoomPricesTwoMonths(propertyId);
+      return res.status(200).json({
+        message: 'Room prices fetched successfully',
+        data: result,
+      });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
 }

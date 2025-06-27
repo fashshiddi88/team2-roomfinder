@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { prisma } from '@/prisma/client';
+import { sendMail } from '@/lib/nodemailer.config';
 import { BookingStatus } from '@prisma/client';
 import { SnapRequest } from '@/models/interface';
 
@@ -60,6 +61,11 @@ export class MidtransService {
     // Cari booking berdasarkan order_id
     const booking = await prisma.booking.findUnique({
       where: { orderNumber: order_id },
+      include: {
+        room: true,
+        user: true,
+        property: true,
+      },
     });
 
     if (!booking) {
@@ -103,6 +109,52 @@ export class MidtransService {
           newStatus === BookingStatus.CONFIRMED ? new Date() : undefined,
       },
     });
+
+    if (newStatus === BookingStatus.CONFIRMED) {
+      await sendMail({
+        to: booking.user.email,
+        subject: 'Pembayaran Anda Telah Dikonfirmasi',
+        html: `
+        <p>Halo Mr/Mrs ${booking.user.name},</p>
+
+<p>Terima kasih telah melakukan pemesanan di platform kami. Berikut adalah detail pemesanan Anda:</p>
+
+<h3> Detail Pemesanan</h3>
+<ul>
+  <li><strong>Nomor Pesanan:</strong> ${booking.orderNumber}</li>
+  <li><strong>Nama Properti:</strong> ${booking.property.name}</li>
+  <li><strong>Kamar:</strong> ${booking.room.name}</li>
+  <li><strong>Tanggal Check-in:</strong> ${booking.checkinDate}</li>
+  <li><strong>Tanggal Check-out:</strong> ${booking.checkoutDate}</li>
+  <li><strong>Total Harga:</strong> Rp${booking.totalPrice}</li>
+</ul>
+
+<h3> Tata Cara Penggunaan Properti</h3>
+<ol>
+  <li>Check-in dimulai pukul 14.00 WIB dan check-out maksimal pukul 12.00 WIB.</li>
+  <li>Tunjukkan email ini atau ID pemesanan saat tiba di lokasi.</li>
+  <li>Dilarang membawa hewan peliharaan tanpa izin terlebih dahulu.</li>
+  <li>Dilarang merokok di dalam ruangan.</li>
+  <li>Mohon jaga kebersihan dan ketertiban selama menginap.</li>
+</ol>
+
+<p>Jika Anda memiliki pertanyaan atau kendala, silakan hubungi tim support kami.</p>
+
+<p>Selamat menginap!<br />
+Tim RoomFinder</p>
+      `,
+      });
+    } else if (newStatus === BookingStatus.CANCELED) {
+      await sendMail({
+        to: booking.user.email,
+        subject: 'Pembayaran Anda Ditolak',
+        html: `
+        <p>Halo Mr/Mrs ${booking.user.name},</p>
+        <p>Mohon maaf, bukti pembayaran Anda untuk pesanan <strong>${booking.orderNumber}</strong> telah <strong>ditolak atau dibatalkan</strong>.</p>
+        <p>Silakan lakukan pemesanan ulang atau hubungi support kami.</p>
+      `,
+      });
+    }
 
     console.log(`[Webhook] Booking ${order_id} updated to ${newStatus}`);
   }

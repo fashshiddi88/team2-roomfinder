@@ -156,6 +156,18 @@ export class BookingService {
     // 2. Jika GATEWAY
     let paymentUrl: string | undefined;
 
+    function formatMidtransTime(date: Date): string {
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, '0'); // bulan dimulai dari 0
+      const dd = String(date.getDate()).padStart(2, '0');
+      const HH = String(date.getHours()).padStart(2, '0');
+      const MM = String(date.getMinutes()).padStart(2, '0');
+      const SS = String(date.getSeconds()).padStart(2, '0');
+
+      // Asumsi lokal kamu +0700, bisa juga pakai Intl.DateTimeFormat kalau mau fleksibel
+      return `${yyyy}-${mm}-${dd} ${HH}:${MM}:${SS} +0700`;
+    }
+
     const itemDetails: ItemDetails[] = days.map((day, index) => ({
       id: `${room.id}-${index}`,
       name: `Room ${room.name} - ${day.toISOString().split('T')[0]}`,
@@ -163,6 +175,7 @@ export class BookingService {
       quantity: 1,
     }));
     const grossAmount = itemDetails.reduce((acc, item) => acc + item.price, 0);
+    const startTime = formatMidtransTime(new Date());
 
     if (bookingType === 'GATEWAY') {
       const payload: SnapRequest = {
@@ -175,9 +188,20 @@ export class BookingService {
           email: user.email,
         },
         item_details: itemDetails,
+        expiry: {
+          start_time: startTime,
+          unit: 'minutes',
+          duration: 120,
+        },
       };
 
       paymentUrl = await this.midtransService.createSnapTransaction(payload);
+      await prisma.booking.update({
+        where: { id: booking.id },
+        data: {
+          expiredAt: new Date(Date.now() + 2 * 60 * 60 * 1000),
+        },
+      });
     }
 
     return { booking, paymentUrl };

@@ -234,4 +234,55 @@ export class PropertyExploreService {
 
     return dailyPrices;
   }
+
+  async getRoomPricesTwoMonths(propertyId: number) {
+    const today = new Date();
+
+    const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endDate = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+
+    const days: Date[] = [];
+    const current = new Date(startDate);
+    while (current <= endDate) {
+      days.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+
+    const rooms = await prisma.room.findMany({
+      where: { propertyId, deletedAt: null },
+      include: { peakRates: true },
+    });
+
+    const dailyPrices = days.map((day) => {
+      let minPrice = Infinity;
+
+      for (const room of rooms) {
+        let price = room.basePrice;
+        const d = day.toISOString().slice(0, 10);
+
+        const peak = room.peakRates.find((rate) => {
+          const s = rate.startDate.toISOString().slice(0, 10);
+          const e = rate.endDate.toISOString().slice(0, 10);
+          return s <= d && d <= e;
+        });
+
+        if (peak) {
+          if (peak.priceModifierType === 'PERCENTAGE') {
+            price += (price * peak.priceModifierValue) / 100;
+          } else {
+            price += peak.priceModifierValue;
+          }
+        }
+
+        if (price < minPrice) minPrice = price;
+      }
+
+      return {
+        date: day.toISOString().slice(0, 10),
+        price: Math.round(minPrice),
+      };
+    });
+
+    return dailyPrices;
+  }
 }
