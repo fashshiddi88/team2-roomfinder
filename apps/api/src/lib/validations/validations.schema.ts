@@ -59,9 +59,132 @@ export const updateProfileSchema = {
   }),
 };
 
-export const updatePasswordSchema = {
+export const updatePasswordSchema = zod
+  .object({
+    oldPassword: zod
+      .string()
+      .min(6, 'Old password must be at least 6 characters'),
+    newPassword: zod
+      .string()
+      .min(6, 'New password must be at least 6 characters'),
+    confirmNewPassword: zod.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: 'New password and confirm password must match',
+    path: ['confirmNewPassword'],
+  });
+
+export const propCategorySchema = {
   body: zod.object({
-    oldPassword: zod.string().min(6, 'Password must be at least 6 characters'),
-    newPassword: zod.string().min(6, 'Password must be at least 6 characters'),
+    name: zod.string().min(1, 'Category name is required'),
+  }),
+};
+
+export const createPropertySchema = {
+  body: zod.object({
+    name: zod.string().min(1, 'Name is required'),
+    categoryId: zod.coerce
+      .number()
+      .int()
+      .positive('Category ID must be a positive number'),
+    description: zod.string().optional(),
+    address: zod.string().min(1, 'Address is required'),
+    cityId: zod.coerce
+      .number()
+      .int()
+      .positive('City ID must be a positive number'),
+  }),
+};
+
+export const createRoomSchema = {
+  body: zod.object({
+    name: zod.string().min(1, { message: 'Room name is required' }),
+    description: zod.string().optional(),
+    qty: zod.coerce
+      .number()
+      .positive({ message: 'Quantity must be a positive number' }),
+    basePrice: zod.coerce
+      .number()
+      .positive({ message: 'Base price must be a positive number' }),
+    capacity: zod.coerce
+      .number()
+      .int()
+      .positive({ message: 'Capacity must be a positive integer' }),
+  }),
+};
+
+export const peakSeasonRateSchema = {
+  body: zod.object({
+    startDate: zod.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: 'Invalid start date',
+    }),
+    endDate: zod.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: 'Invalid end date',
+    }),
+    priceModifierType: zod.enum(['PERCENTAGE', 'FIXED']),
+    priceModifierValue: zod.number().min(0, {
+      message: 'Price modifier must be a positive number',
+    }),
+  }),
+};
+
+export const bookingSchema = {
+  body: zod
+    .object({
+      propertyId: zod.number({
+        required_error: 'Property ID is required',
+        invalid_type_error: 'Property ID must be a number',
+      }),
+      roomId: zod.number({
+        required_error: 'Room ID is required',
+        invalid_type_error: 'Room ID must be a number',
+      }),
+      startDate: zod.preprocess(
+        (arg) => {
+          const date = new Date(arg as string);
+          return isNaN(date.getTime()) ? undefined : date;
+        },
+        zod.date({ required_error: 'Start date is required' }),
+      ),
+      endDate: zod.preprocess(
+        (arg) => {
+          const date = new Date(arg as string);
+          return isNaN(date.getTime()) ? undefined : date;
+        },
+        zod.date({ required_error: 'End date is required' }),
+      ),
+      bookingType: zod.enum(['MANUAL', 'GATEWAY'], {
+        required_error: 'Booking type is required',
+      }),
+      name: zod.string().optional(),
+    })
+    .refine((data) => data.startDate < data.endDate, {
+      message: 'End date must be after start date',
+      path: ['endDate'],
+    }),
+};
+
+export const snapRequestSchema = {
+  body: zod.object({
+    transaction_details: zod.object({
+      order_id: zod.string().min(1, 'Order ID is required'),
+      gross_amount: zod.number().positive('Amount must be greater than 0'),
+    }),
+    customer_details: zod
+      .object({
+        first_name: zod.string(),
+        email: zod.string().email(),
+      })
+      .optional(),
+    item_details: zod
+      .array(
+        zod.object({
+          id: zod.string(),
+          name: zod.string(),
+          price: zod.number().positive(),
+          quantity: zod.number().int().positive(),
+        }),
+      )
+      .optional(),
   }),
 };

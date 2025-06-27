@@ -17,6 +17,26 @@ export class ProfileService {
     });
   }
 
+  public async getProfileTenant(userId: number) {
+    return await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        profilePhoto: true,
+        role: true,
+        tenant: {
+          select: {
+            id: true,
+            companyName: true,
+          },
+        },
+      },
+    });
+  }
+
   public async updateProfile(
     userId: number,
     data: {

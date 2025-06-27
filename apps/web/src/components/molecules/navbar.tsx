@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Logo from "../atomics/logo";
-import AuthButtons from "../atomics/auth-button";
+import { useState } from 'react';
+import { Menu, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Logo from '../atomics/logo';
+import AuthButtons from '../atomics/auth-button';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const menuItems = ["Find a Property", "Rental Guides", "Download Mobile App"];
+  const menuItems = ['Find a Property', 'Rental Guides', 'Download Mobile App'];
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200">
@@ -70,12 +70,12 @@ export default function Navbar() {
             </Button>
             <div className="pt-3 border-t border-gray-200 mt-3">
               <div className="flex flex-col space-y-2">
-                <a href="/login">
+                <a href="/Login">
                   <Button variant="ghost" className="w-full justify-start">
                     Sign In
                   </Button>
                 </a>
-                <a href="/register">
+                <a href="/Register">
                   <Button className="w-full">Sign Up</Button>
                 </a>
               </div>

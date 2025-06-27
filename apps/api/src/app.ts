@@ -12,6 +12,15 @@ import { PORT } from './config';
 import { AuthRouter } from './routers/auth.router';
 import { OauthRouter } from './routers/oauth.router';
 import { ProfileRouter } from './routers/profile.router';
+import { PropertyCategoryRouter } from './routers/propertyCategory.router';
+import { PropertyRouter } from './routers/property.router';
+import { RoomRouter } from './routers/room.router';
+import { RoomAvailabilityRouter } from './routers/roomAvailability.router';
+import { PeakSeasonRateRouter } from './routers/peakSeasonRate.router';
+import { CatalogRouter } from './routers/catalog.router';
+import { PropertyExploreRouter } from './routers/propertyExplore.router';
+import { BookingRouter } from './routers/booking.router';
+import { MidtransRouter } from './routers/midtrans.router';
 
 export default class App {
   private app: Express;
@@ -56,6 +65,15 @@ export default class App {
     this.app.use('/api', new AuthRouter().router);
     this.app.use('/api', new OauthRouter().router);
     this.app.use('/api', new ProfileRouter().router);
+    this.app.use('/api', new PropertyCategoryRouter().router);
+    this.app.use('/api', new PropertyRouter().router);
+    this.app.use('/api', new RoomRouter().router);
+    this.app.use('/api', new RoomAvailabilityRouter().router);
+    this.app.use('/api', new PeakSeasonRateRouter().router);
+    this.app.use('/api', new CatalogRouter().router);
+    this.app.use('/api', new PropertyExploreRouter().router);
+    this.app.use('/api', new BookingRouter().router);
+    this.app.use('/api', new MidtransRouter().router);
   }
 
   public start(): void {

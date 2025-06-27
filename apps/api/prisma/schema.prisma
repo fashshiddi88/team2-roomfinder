@@ -46,36 +46,66 @@ model Tenant {
 model PropertyCategory {
   id         Int        @id @default(autoincrement())
   name       String
+  isDeleted  Boolean    @default(false)
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   properties Property[]
 }
 
+model Province {
+  id     Int    @id @default(autoincrement())
+  name   String @unique
+  cities City[]
+}
+
+model City {
+  id         Int        @id @default(autoincrement())
+  name       String
+  provinceId Int
+  province   Province   @relation(fields: [provinceId], references: [id])
+  properties Property[]
+}
+
 model Property {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   tenantId    Int
   categoryId  Int
   name        String
   description String?
-  location    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  cityId      Int
+  address     String
+  image       String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 
-  tenant   Tenant           @relation(fields: [tenantId], references: [id])
-  category PropertyCategory @relation(fields: [categoryId], references: [id])
-  rooms    Room[]
-  bookings Booking[]
+  tenant         Tenant           @relation(fields: [tenantId], references: [id])
+  category       PropertyCategory @relation(fields: [categoryId], references: [id])
+  city           City             @relation(fields: [cityId], references: [id])
+  rooms          Room[]
+  bookings       Booking[]
+  PropertyImages PropertyImage[]
+}
+
+model PropertyImage {
+  id         Int      @id @default(autoincrement())
+  url        String
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id])
 }
 
 model Room {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   propertyId  Int
   name        String
   description String?
+  image       String
+  qty         Int
   basePrice   Float
   capacity    Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 
   property       Property           @relation(fields: [propertyId], references: [id])
   availabilities RoomAvailability[]
@@ -84,12 +114,12 @@ model Room {
 }
 
 model RoomAvailability {
-  id          Int      @id @default(autoincrement())
-  roomId      Int
-  date        DateTime
-  isAvailable Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  roomId    Int
+  date      DateTime
+  available Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   room Room @relation(fields: [roomId], references: [id])
 
@@ -110,29 +140,47 @@ model PeakSeasonRate {
 }
 
 model Booking {
-  id           Int           @id @default(autoincrement())
-  userId       Int
-  propertyId   Int
-  roomId       Int
-  checkinDate  DateTime
-  duration     Int
-  totalPrice   Float
-  status       BookingStatus
-  paymentProof String? // path or URL ke file
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id             Int           @id @default(autoincrement())
+  userId         Int
+  propertyId     Int
+  roomId         Int
+  orderNumber    String        @unique
+  checkinDate    DateTime
+  checkoutDate   DateTime
+  totalPrice     Float
+  status         BookingStatus
+  bookingType    BookingType
+  paymentProof   String?
+  autoCanceledAt DateTime?
+  confirmedAt    DateTime?
+  rejectedAt     DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  expiredAt      DateTime?
+  deleteAt       DateTime?
 
   user     User     @relation(fields: [userId], references: [id])
   property Property @relation(fields: [propertyId], references: [id])
   room     Room     @relation(fields: [roomId], references: [id])
   review   Review?
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model DailyOrderCounter {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @unique
+  counter   Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Review {
   id          Int      @id @default(autoincrement())
   bookingId   Int      @unique
   userId      Int
-  rating      Int? // opsional, misal 1-5
+  rating      Int?
   comment     String
   tenantReply String?
   createdAt   DateTime @default(now())
@@ -160,6 +208,11 @@ enum BookingStatus {
   DONE
   REJECTED
   EXPIRED
+}
+
+enum BookingType {
+  MANUAL
+  GATEWAY
 }
 
 enum PriceModifierType {

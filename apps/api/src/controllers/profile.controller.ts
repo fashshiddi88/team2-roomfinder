@@ -32,6 +32,30 @@ export class ProfileController {
     }
   }
 
+  public async getProfileTenant(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user?.userId;
+
+      const user = await this.profileService.getProfileTenant(userId);
+
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      return res.status(200).json({
+        message: 'Tenant Profile fetched successfully',
+        detail: user,
+      });
+    } catch (error) {
+      console.error(error);
+
+      return res.status(500).json({
+        message: 'Failed to fetch tenant profile',
+        detail: error instanceof Error ? error.message : error,
+      });
+    }
+  }
+
   public async updateProfile(req: Request, res: Response) {
     try {
       const userId = (req as any).user?.userId;
