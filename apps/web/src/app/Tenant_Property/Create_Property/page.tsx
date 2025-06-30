@@ -1,12 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import SideNavbar from '@/app/Tenant_Navbar/page';
+import { withAuthRoles } from '@/middleware/withAuthRoles';
+import TenantSidebar from '@/app/Tenant_Navbar/page';
+import {
+  getAllCities,
+  getAllPropertyCategories,
+  createProperty,
+} from '@/lib/api/axios';
+import { toast } from 'sonner';
 
-export default function TenantAddPropertyPage() {
+function TenantAddPropertyPage() {
   const router = useRouter();
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>(
+    [],
+  );
 
+  const [cities, setCities] = useState<{ id: number; name: string }[]>([]);
   const [form, setForm] = useState({
     name: '',
     categoryId: '',
@@ -14,12 +25,40 @@ export default function TenantAddPropertyPage() {
     address: '',
     cityId: '',
   });
-
+  const [loading, setLoading] = useState(false);
   const [mainImage, setMainImage] = useState<File | null>(null);
   const [galleryImages, setGalleryImages] = useState<FileList | null>(null);
 
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getAllPropertyCategories();
+        setCategories(data); // pastikan response pakai .data
+      } catch (err) {
+        toast.error('Gagal memuat kategori properti');
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Fetch cities
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const data = await getAllCities();
+        setCities(data); // pastikan response pakai .data
+      } catch (err) {
+        toast.error('Gagal memuat data kota');
+      }
+    };
+    fetchCities();
+  }, []);
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -27,16 +66,16 @@ export default function TenantAddPropertyPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     const data = new FormData();
-    Object.entries(form).forEach(([key, value]) => {
-      data.append(key, value);
-    });
+    data.append('name', form.name);
+    data.append('categoryId', String(form.categoryId));
+    data.append('description', form.description);
+    data.append('address', form.address);
+    data.append('cityId', String(form.cityId));
 
-    if (mainImage) {
-      data.append('mainImage', mainImage);
-    }
-
+    if (mainImage) data.append('mainImage', mainImage);
     if (galleryImages) {
       Array.from(galleryImages).forEach((file) => {
         data.append('galleryImages', file);
@@ -44,32 +83,32 @@ export default function TenantAddPropertyPage() {
     }
 
     try {
-      const res = await fetch('http://localhost:8000/api/property', {
-        method: 'POST',
-        body: data,
-      });
-
-      if (!res.ok) throw new Error('Failed to submit');
-
-      alert('Property created successfully!');
+      const res = await createProperty(data);
+      console.log(res);
+      toast.success('Berhasil menambahkan properti');
       router.push('/Tenant_Property');
-    } catch (err) {
-      alert('Failed to create property');
+    } catch (err: any) {
       console.error(err);
+      toast.error(err?.response?.data?.message || 'Gagal menambahkan properti');
+      setLoading(false);
     }
   };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <SideNavbar />
+      <TenantSidebar />
 
       <main className="flex-1 px-8 py-10">
         <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow">
-          <h2 className="text-2xl font-bold mb-6">Add New Property</h2>
+          <h2 className="text-2xl font-bold mb-6">Buat Properti Baru</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-5" encType="multipart/form-data">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-5"
+            encType="multipart/form-data"
+          >
             <div>
-              <label className="block font-medium mb-1">Property Name *</label>
+              <label className="block font-medium mb-1">Nama Properti *</label>
               <input
                 type="text"
                 name="name"
@@ -81,31 +120,45 @@ export default function TenantAddPropertyPage() {
             </div>
 
             <div>
-              <label className="block font-medium mb-1">Category  *</label>
-              <input
-                type="text"
+              <label className="block font-medium mb-1">Kategori *</label>
+              <select
                 name="categoryId"
                 value={form.categoryId}
                 onChange={handleChange}
                 required
                 className="w-full border p-2 rounded"
-              />
+              >
+                <option value="">Pilih kategori</option>
+                {Array.isArray(categories) &&
+                  categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+              </select>
             </div>
 
             <div>
-              <label className="block font-medium mb-1">City*</label>
-              <input
-                type="text"
+              <label className="block font-medium mb-1">Kota *</label>
+              <select
                 name="cityId"
                 value={form.cityId}
                 onChange={handleChange}
                 required
                 className="w-full border p-2 rounded"
-              />
+              >
+                <option value="">Pilih kota</option>
+                {Array.isArray(cities) &&
+                  cities.map((city) => (
+                    <option key={city.id} value={city.id}>
+                      {city.name}
+                    </option>
+                  ))}
+              </select>
             </div>
 
             <div>
-              <label className="block font-medium mb-1">Address *</label>
+              <label className="block font-medium mb-1">Alamat *</label>
               <input
                 type="text"
                 name="address"
@@ -117,7 +170,7 @@ export default function TenantAddPropertyPage() {
             </div>
 
             <div>
-              <label className="block font-medium mb-1">Description</label>
+              <label className="block font-medium mb-1">Deskripsi</label>
               <textarea
                 name="description"
                 value={form.description}
@@ -139,7 +192,9 @@ export default function TenantAddPropertyPage() {
             </div>
 
             <div>
-              <label className="block font-medium mb-1">Gallery Images (multiple)</label>
+              <label className="block font-medium mb-1">
+                Gallery Images (multiple)
+              </label>
               <input
                 type="file"
                 accept="image/*"
@@ -152,9 +207,14 @@ export default function TenantAddPropertyPage() {
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+                disabled={loading}
+                className={`bg-blue-600 text-white px-6 py-2 rounded ${
+                  loading
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'hover:bg-blue-700'
+                }`}
               >
-                Add Property
+                {loading ? 'Memproses...' : 'Buat Property'}
               </button>
             </div>
           </form>
@@ -163,3 +223,5 @@ export default function TenantAddPropertyPage() {
     </div>
   );
 }
+
+export default withAuthRoles(['TENANT'])(TenantAddPropertyPage);

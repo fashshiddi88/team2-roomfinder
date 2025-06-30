@@ -52,6 +52,28 @@ export class PropertyController {
     }
   }
 
+  public async getPropertyById(req: Request, res: Response) {
+    try {
+      const propertyId = Number(req.params.id);
+      const userId = (req as any).user?.userId;
+
+      const result = await this.propertyService.getPropertyById(
+        propertyId,
+        userId,
+      );
+
+      return res.status(200).json({
+        message: 'Property fetched successfully',
+        data: result,
+      });
+    } catch (error: any) {
+      return res.status(400).json({
+        message: 'Failed to fetch property',
+        detail: error.message || error,
+      });
+    }
+  }
+
   async updateProperty(req: Request, res: Response) {
     try {
       const tenant = (req as any).user;

@@ -57,7 +57,7 @@ export default function LoginTenantForm() {
 
       login(access_token, role, id);
       toast.success('Login berhasil!');
-      router.push('/');
+      router.push('/Tenant_Property');
     } catch (error: any) {
       console.error(error);
       toast.error(

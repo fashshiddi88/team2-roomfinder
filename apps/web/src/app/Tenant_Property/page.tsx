@@ -2,28 +2,29 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { withAuthRoles } from '@/middleware/withAuthRoles';
+import { useState, useEffect } from 'react';
 import TenantSidebar from '../Tenant_Navbar/page';
-
-const dummyProperties = [
-  {
-    id: 1,
-    name: 'Villa Serenity',
-    category: 'Villa',
-    image: '/villa.jpg',
-    status: 'Available',
-  },
-  {
-    id: 2,
-    name: 'Urban Loft',
-    category: 'Apartment',
-    image: '/urban_loft.jpg',
-    status: 'Not Available',
-  },
-];
+import TenantPropertyTable from '@/components/molecules/TenantPropertyTable';
+import { getTenantProperties } from '@/lib/api/axios';
+import { toast } from 'sonner';
+import { PropertyType } from '@/types/property';
 
 function TenantMyPropertyPage() {
+  const [properties, setProperties] = useState<PropertyType[]>([]);
+
+  useEffect(() => {
+    const fetchPropertyData = async () => {
+      try {
+        const property = await getTenantProperties();
+        setProperties(property.data);
+      } catch (error) {
+        toast.error('Gagal memuat data properti.');
+      }
+    };
+    fetchPropertyData();
+  }, []);
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <TenantSidebar />
@@ -40,66 +41,10 @@ function TenantMyPropertyPage() {
           </div>
 
           <div className="bg-white shadow-md rounded-lg overflow-x-auto">
-            <table className="w-full table-auto">
-              <thead className="bg-gray-100 text-left">
-                <tr>
-                  <th className="p-4">Image</th>
-                  <th className="p-4">Name</th>
-                  <th className="p-4">Category</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dummyProperties.map((property) => (
-                  <tr key={property.id} className="border-b hover:bg-gray-50">
-                    <td className="p-4">
-                      <Image
-                        src={property.image}
-                        alt={property.name}
-                        width={80}
-                        height={80}
-                        className="rounded-lg object-cover"
-                      />
-                    </td>
-                    <td className="p-4 font-semibold">{property.name}</td>
-                    <td className="p-4">{property.category}</td>
-                    <td className="p-4">
-                      <span
-                        className={`px-2 py-1 rounded text-sm font-medium ${
-                          property.status === 'Available'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-700'
-                        }`}
-                      >
-                        {property.status}
-                      </span>
-                    </td>
-                    <td className="p-4 whitespace-nowrap">
-                      <Link
-                        href={`/tenant/properties/edit/${property.id}`}
-                        className="text-blue-600 hover:underline mr-4"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={() => alert(`Deleting ${property.name}`)}
-                        className="text-red-600 hover:underline"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {dummyProperties.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="p-4 text-center text-gray-500">
-                      No properties found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            <TenantPropertyTable
+              properties={properties}
+              setProperties={setProperties}
+            />
           </div>
         </div>
       </main>

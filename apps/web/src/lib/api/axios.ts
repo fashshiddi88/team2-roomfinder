@@ -7,6 +7,16 @@ const api = axios.create({
   },
 });
 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export default api;
+
 export async function loginUser(email: string, password: string) {
   const response = await api.post('/api/auth/login', { email, password });
   return response.data.data;
@@ -45,4 +55,93 @@ export async function resetPassword(token: string, newPassword: string) {
   });
 
   return response.data;
+}
+
+export async function getProfileTenant() {
+  const response = await api.get('/api/profile/tenant');
+  return response.data;
+}
+
+export async function getTenantProperties() {
+  const response = await api.get('/api/property/my-properties');
+  return response.data;
+}
+
+export async function getAllPropertyCategories() {
+  const response = await api.get('/api/property-category/all');
+  return response.data.data;
+}
+
+export async function getAllCities() {
+  const response = await api.get('/api/cities');
+  return response.data.data;
+}
+
+export async function createProperty(formData: FormData) {
+  const response = await api.post('/api/property', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return response.data;
+}
+
+export async function softDeleteProperty(id: number) {
+  const response = await api.delete(`/api/property/${id}`);
+  return response.data;
+}
+
+export async function restoreProperty(id: number) {
+  const response = await api.patch(`/api/property/restore/${id}`);
+  return response.data;
+}
+
+export async function hardDeleteProperty(id: number) {
+  const response = await api.delete(`/api/property/hard-delete/${id}`);
+  return response.data;
+}
+
+export async function updateProperty(
+  id: number,
+  form: {
+    name?: string;
+    categoryId?: string;
+    description?: string;
+    address?: string;
+    cityId?: string;
+  },
+  mainImage?: File | null,
+  galleryImages?: FileList | null,
+) {
+  const data = new FormData();
+
+  Object.entries(form).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      data.append(key, value);
+    }
+  });
+
+  if (mainImage) {
+    data.append('mainImage', mainImage);
+  }
+
+  if (galleryImages) {
+    Array.from(galleryImages).forEach((file) => {
+      data.append('galleryImages', file);
+    });
+  }
+
+  const response = await api.put(`/api/property/${id}`, data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return response.data;
+}
+
+export async function getPropertyById(id: number | string) {
+  const res = await api.get(`/api/property/${id}`);
+  return res.data;
 }

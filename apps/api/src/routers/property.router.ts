@@ -58,5 +58,12 @@ export class PropertyRouter {
       AuthorizationMiddleware.allowRoles('TENANT'),
       this.propertyController.getTenantProperties.bind(this.propertyController),
     );
+
+    this.router.get(
+      '/property/:id',
+      AuthenticationMiddleware.verifyToken,
+      AuthorizationMiddleware.allowRoles('TENANT'),
+      this.propertyController.getPropertyById.bind(this.propertyController),
+    );
   }
 }

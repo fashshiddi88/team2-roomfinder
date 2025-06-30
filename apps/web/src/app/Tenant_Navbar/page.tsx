@@ -14,7 +14,10 @@ import {
   User,
   Hotel,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getProfileTenant } from '@/lib/api/axios';
+import { toast } from 'sonner';
+import Image from 'next/image';
 
 const tenantMenu = [
   { label: 'My Property', href: '/Tenant_Property', icon: <Home size={20} /> },
@@ -30,7 +33,26 @@ const tenantMenu = [
 export default function TenantSidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [userId, setUserId] = useState<number | null>(null);
+  const [name, setName] = useState('');
+  const [profileImg, setProfileImg] = useState('');
   const { logout } = useAuth();
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const profile = await getProfileTenant();
+        const data = profile.detail;
+
+        setUserId(data.id);
+        setName(data.tenant?.companyName);
+        setProfileImg(data.profilePhoto);
+      } catch (error) {
+        toast.error('Gagal memuat data pengguna.');
+      }
+    };
+    fetchUserData();
+  }, []);
 
   const handleLogoutClick = () => {
     Swal.fire({
@@ -43,7 +65,7 @@ export default function TenantSidebar() {
       cancelButtonText: 'Batal',
     }).then((result) => {
       if (result.isConfirmed) {
-        logout(); // ini tidak bentrok dengan handleLogoutClick
+        logout();
       }
     });
   };
@@ -81,13 +103,26 @@ export default function TenantSidebar() {
       <div
         className={`flex items-center p-4 ${collapsed ? 'justify-center' : 'border-b border-gray-200'}`}
       >
-        <div className="bg-gray-200 border-2 border-dashed rounded-full w-10 h-10 flex items-center justify-center">
-          <User size={18} className="text-gray-500" />
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-dashed">
+          {profileImg ? (
+            <Image
+              src={profileImg}
+              alt="Profile"
+              width={40}
+              height={40}
+              className="object-cover w-full h-full"
+            />
+          ) : (
+            <User
+              size={18}
+              className="text-gray-500 w-full h-full flex items-center justify-center"
+            />
+          )}
         </div>
         {!collapsed && (
           <div className="ml-3">
-            <h3 className="font-medium text-gray-800">Alex Johnson</h3>
-            <p className="text-xs text-gray-500">Property Manager</p>
+            <h3 className="font-bold text-lg text-gray-800">{name}</h3>
+            <p className="text-sm text-gray-500">Tenant</p>
           </div>
         )}
       </div>

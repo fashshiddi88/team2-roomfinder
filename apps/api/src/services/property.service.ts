@@ -74,6 +74,42 @@ export class PropertyService {
     });
   }
 
+  async getPropertyById(propertyId: number, userId: number) {
+    const tenant = await prisma.tenant.findUnique({ where: { userId } });
+    if (!tenant) throw new Error('Tenant not found');
+
+    const property = await prisma.property.findFirst({
+      where: {
+        id: propertyId,
+        tenantId: tenant.id,
+      },
+      include: {
+        category: true,
+        city: true,
+        rooms: {
+          include: {
+            availabilities: true,
+          },
+        },
+        PropertyImages: true,
+        reviews: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!property) throw new Error('Property not found or not owned by tenant');
+
+    return property;
+  }
+
   async updateProperty(
     propertyId: number,
     userId: number,
@@ -214,7 +250,7 @@ export class PropertyService {
     if (!tenant) throw new Error('Tenant not found');
 
     return prisma.property.findMany({
-      where: { tenantId: tenant.id, deletedAt: null },
+      where: { tenantId: tenant.id },
       include: {
         rooms: true,
         PropertyImages: true,
