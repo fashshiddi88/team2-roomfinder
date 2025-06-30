@@ -3,8 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-
-import SideNavbar from '@/app/Tenant_Navbar/page';
+import { withAuthRoles } from '@/middleware/withAuthRoles';
+import TenantSidebar from '../Tenant_Navbar/page';
 
 const dummyProperties = [
   {
@@ -23,10 +23,10 @@ const dummyProperties = [
   },
 ];
 
-export default function TenantMyPropertyPage() {
+function TenantMyPropertyPage() {
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <SideNavbar />
+      <TenantSidebar />
       <main className="flex-1 px-6 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
@@ -106,3 +106,4 @@ export default function TenantMyPropertyPage() {
     </div>
   );
 }
+export default withAuthRoles(['TENANT'])(TenantMyPropertyPage);

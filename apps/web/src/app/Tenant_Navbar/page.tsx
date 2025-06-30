@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { useAuth } from '../utils/hook/useAuth';
+import Swal from 'sweetalert2';
 import { usePathname } from 'next/navigation';
 import {
   Home,
@@ -16,7 +18,11 @@ import { useState } from 'react';
 
 const tenantMenu = [
   { label: 'My Property', href: '/Tenant_Property', icon: <Home size={20} /> },
-  { label: 'Bookings', href: '/Tenant_Bookings', icon: <CalendarCheck size={20} /> },
+  {
+    label: 'Bookings',
+    href: '/Tenant_Bookings',
+    icon: <CalendarCheck size={20} />,
+  },
   { label: 'Reviews', href: '/Tenant_Reviews', icon: <Star size={20} /> },
   { label: 'Settings', href: '/Tenant_Settings', icon: <Settings size={20} /> },
 ];
@@ -24,6 +30,23 @@ const tenantMenu = [
 export default function TenantSidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const { logout } = useAuth();
+
+  const handleLogoutClick = () => {
+    Swal.fire({
+      title: 'Yakin ingin logout?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Iya',
+      cancelButtonText: 'Batal',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        logout(); // ini tidak bentrok dengan handleLogoutClick
+      }
+    });
+  };
 
   return (
     <aside
@@ -55,7 +78,9 @@ export default function TenantSidebar() {
       </div>
 
       {/* User Profile */}
-      <div className={`flex items-center p-4 ${collapsed ? 'justify-center' : 'border-b border-gray-200'}`}>
+      <div
+        className={`flex items-center p-4 ${collapsed ? 'justify-center' : 'border-b border-gray-200'}`}
+      >
         <div className="bg-gray-200 border-2 border-dashed rounded-full w-10 h-10 flex items-center justify-center">
           <User size={18} className="text-gray-500" />
         </div>
@@ -95,6 +120,7 @@ export default function TenantSidebar() {
         {/* Logout - moved just below nav */}
         <div className="px-4 pt-2">
           <button
+            onClick={handleLogoutClick}
             className={`flex items-center gap-3 text-gray-600 hover:text-red-600 w-full ${
               collapsed ? 'justify-center' : ''
             }`}

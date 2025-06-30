@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import TenantNavbar from '@/app/Tenant_Navbar/page'; 
+import TenantSidebar from '../Tenant_Navbar/page';
 
 export default function TenantReviewsPage() {
   const reviews = [
@@ -22,7 +22,7 @@ export default function TenantReviewsPage() {
   return (
     <div className="flex">
       {/* Sidebar */}
-      <TenantNavbar />
+      <TenantSidebar />
 
       {/* Main content */}
       <main className="flex-1 p-6">
@@ -35,8 +35,7 @@ export default function TenantReviewsPage() {
             >
               <h2 className="text-lg font-medium">{review.property}</h2>
               <p className="text-yellow-500 mb-1">
-                {'★'.repeat(review.rating)}{' '}
-                {'☆'.repeat(5 - review.rating)}
+                {'★'.repeat(review.rating)} {'☆'.repeat(5 - review.rating)}
               </p>
               <p className="text-gray-700">{review.comment}</p>
             </div>

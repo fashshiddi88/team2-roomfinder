@@ -1,9 +1,10 @@
 'use client';
 
 import React from 'react';
-import TenantNavbar from '@/app/Tenant_Navbar/page'; // asumsinya ini adalah komponen, bukan halaman
+import { withAuthRoles } from '@/middleware/withAuthRoles';
+import TenantSidebar from '../Tenant_Navbar/page';
 
-export default function TenantBookingsPage() {
+function TenantBookingsPage() {
   const bookings = [
     {
       id: '1',
@@ -22,7 +23,7 @@ export default function TenantBookingsPage() {
   return (
     <div className="flex">
       {/* Sidebar */}
-      <TenantNavbar />
+      <TenantSidebar />
 
       {/* Main content */}
       <main className="flex-1 p-6">
@@ -43,3 +44,4 @@ export default function TenantBookingsPage() {
     </div>
   );
 }
+export default withAuthRoles(['TENANT'])(TenantBookingsPage);

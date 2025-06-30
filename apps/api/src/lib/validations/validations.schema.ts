@@ -32,10 +32,8 @@ export const loginSchema = {
 
 export const verifySchema = {
   body: zod.object({
-    password: zod.string().min(6, 'Password must be at least 6 characters'),
-  }),
-  query: zod.object({
     token: zod.string().min(1, 'Token is required'),
+    password: zod.string().min(6, 'Password must be at least 6 characters'),
   }),
 };
 

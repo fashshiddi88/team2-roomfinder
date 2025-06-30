@@ -44,8 +44,7 @@ export class AuthController {
 
   async verify(req: Request, res: Response): Promise<void> {
     try {
-      const token = req.query.token as string;
-      const { password } = req.body;
+      const { token, password } = req.body;
 
       if (!token || !password) {
         res.status(400).json({
@@ -83,7 +82,7 @@ export class AuthController {
       });
     } catch (error: any) {
       res.status(401).json({
-        message: 'Unauthorized: Failed login',
+        message: 'Email atau password salah, coba lagi.',
         error: error.message,
       });
     }

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import Link from 'next/link';
 import { useState } from 'react';
 import RegisterForm from '@/components/Register/RegisterForm';
@@ -56,12 +56,11 @@ export default function Navbar() {
           </Link>
 
           <Link
-            href="/Register"
+            href="/Register_User"
             className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition-colors font-semibold"
           >
             Register
           </Link>
-
 
           <button className="md:hidden p-2 rounded-md" aria-label="Menu">
             <svg

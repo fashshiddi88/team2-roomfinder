@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import TenantNavbar from '@/app/Tenant_Navbar/page';
+import TenantSidebar from '../Tenant_Navbar/page';
 
 export default function TenantSettingsPage() {
   const [form, setForm] = useState({
@@ -23,7 +23,7 @@ export default function TenantSettingsPage() {
   return (
     <div className="flex">
       {/* Sidebar */}
-      <TenantNavbar />
+      <TenantSidebar />
 
       {/* Main content */}
       <main className="flex-1 p-6">

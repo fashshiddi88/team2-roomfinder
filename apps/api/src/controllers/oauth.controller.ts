@@ -10,20 +10,26 @@ export class OauthController {
   }
 
   async googleCallback(req: Request, res: Response) {
-    const code = req.query.code as string;
+    const { code } = req.query;
 
     if (!code) {
-      return res.status(400).json({ message: 'Authorization code is missing' });
+      return res.status(400).send('Missing authorization code');
     }
 
     try {
-      const result = await this.oauthService.handleGoogleCallback(code, 'USER');
-      res.json(result);
-    } catch (err: any) {
-      console.error('Google OAuth error:', err);
-      res
-        .status(500)
-        .json({ message: 'Google login failed', detail: err.message });
+      const result = await this.oauthService.handleGoogleCallback(
+        code as string,
+        'USER',
+      );
+
+      const { token, user } = result;
+
+      return res.redirect(
+        `http://localhost:3000/auth/callback?token=${token}&role=${user.role}&userId=${user.id}`,
+      );
+    } catch (error) {
+      console.error('Google callback error', error);
+      return res.redirect('http://localhost:3000/login?error=oauth_failed');
     }
   }
 
@@ -64,7 +70,10 @@ export class OauthController {
         code,
         companyName,
       );
-      res.json(result);
+      const { token, user } = result;
+      return res.redirect(
+        `http://localhost:3000/auth/callback?token=${token}&role=${user.role}&userId=${user.id}`,
+      );
     } catch (err: any) {
       console.error('Google OAuth tenant error:', err);
       res.status(500).json({

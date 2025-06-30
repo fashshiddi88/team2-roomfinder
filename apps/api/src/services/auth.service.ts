@@ -32,7 +32,7 @@ export class AuthService {
       },
     });
 
-    const verificationLink = `${process.env.FRONTEND_URL}/verify?token=${verificationToken}`;
+    const verificationLink = `${process.env.FRONTEND_URL}/Register_Pass?token=${verificationToken}`;
     await sendVerificationEmail(user.email, verificationLink);
 
     return { message: 'User created. Verification email sent.' };
@@ -65,7 +65,7 @@ export class AuthService {
       include: { tenant: true },
     });
 
-    const verificationLink = `${process.env.FRONTEND_URL}/verify?token=${verificationToken}`;
+    const verificationLink = `${process.env.FRONTEND_URL}/Register_Tenant_Pass?token=${verificationToken}`;
     await sendVerificationEmail(user.email, verificationLink);
 
     return { message: 'Tenant created. Verification email sent.' };
