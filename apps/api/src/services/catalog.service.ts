@@ -59,6 +59,7 @@ export class CatalogService {
         property: {
           include: {
             city: true,
+            category: true,
           },
         },
         peakRates: true,
@@ -135,7 +136,7 @@ export class CatalogService {
         name: property.name,
         image: property.image,
         address: property.address,
-        categoryId: property.categoryId,
+        category: property.category,
         minPrice,
       }),
     );

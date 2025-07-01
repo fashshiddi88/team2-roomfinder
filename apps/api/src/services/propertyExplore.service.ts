@@ -29,6 +29,16 @@ export class PropertyExploreService {
             peakRates: true,
           },
         },
+        reviews: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                profilePhoto: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -99,6 +109,14 @@ export class PropertyExploreService {
       category: property.category.name,
       propertyImages: property.PropertyImages.map((img) => img.url),
       rooms,
+      reviews: property.reviews.map((review) => ({
+        id: review.id,
+        comment: review.comment,
+        rating: review.rating,
+        photo: review.user.profilePhoto || '/default-avatar.jpg',
+        name: review.user?.name,
+        createdAt: review.createdAt,
+      })),
     };
   }
 

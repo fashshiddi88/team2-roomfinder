@@ -22,3 +22,35 @@ export type PeakSeasonType = {
   priceModifierType: string;
   priceModifierValue: number;
 };
+
+export type Room = {
+  id: number;
+  name: string;
+  image: string;
+  description: string;
+  capacity: number;
+  totalAvailable: number;
+  effectivePrice: number;
+};
+
+export type Review = {
+  id: number;
+  name: string;
+  photo?: string;
+  rating: number;
+  comment: string;
+};
+
+export type Property = {
+  id: number;
+  name: string;
+  image: string;
+  address: string;
+  description: string;
+  city: string;
+  category: string;
+  propertyImages: string[];
+  rooms: Room[];
+  reviews: Review[];
+  mapEmbedUrl?: string;
+};

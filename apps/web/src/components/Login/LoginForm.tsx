@@ -37,6 +37,7 @@ export default function LoginForm() {
         email: fieldErrors.email?._errors[0],
         password: fieldErrors.password?._errors[0],
       });
+      setLoading(false);
       return;
     }
 
@@ -47,26 +48,32 @@ export default function LoginForm() {
       const { access_token, user } = data;
       const { role, id } = user;
 
-      if (role !== 'USER') {
+      if (role !== 'USER' && role !== 'TENANT') {
         toast.error('Akun ini tidak memiliki akses.');
         logout();
         router.replace('/Login');
-        setLoading(false);
         return;
       }
 
       login(access_token, role, id);
       toast.success('Login berhasil!');
-      router.push('/');
+
+      if (role === 'TENANT') {
+        router.push('/Tenant_Property');
+      } else {
+        router.push('/'); // ganti dengan path dashboard user
+      }
     } catch (error: any) {
       console.error(error);
       toast.error(
         error.response?.data?.message ||
           'Email atau password salah, coba lagi.',
       );
+    } finally {
       setLoading(false);
     }
   };
+
   if (loading) return <LoadingScreen message="Logging in with email..." />;
 
   return (
@@ -86,6 +93,9 @@ export default function LoginForm() {
               className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
+            {errors.email && (
+              <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+            )}
           </div>
 
           <div className="mb-4">
@@ -110,6 +120,9 @@ export default function LoginForm() {
                 )}
               </span>
             </div>
+            {errors.password && (
+              <p className="text-sm text-red-500 mt-1">{errors.password}</p>
+            )}
           </div>
 
           <div className="flex items-center justify-between mb-6">
@@ -126,12 +139,9 @@ export default function LoginForm() {
             type="submit"
             variant="accent"
             className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition justify-center"
-            onClick={undefined}
             disabled={loading}
           >
-            {' '}
             <Text weight="bold" size="lg" color="white">
-              {' '}
               {loading ? 'Memproses...' : 'Masuk'}
             </Text>
           </Button>
@@ -139,24 +149,22 @@ export default function LoginForm() {
 
         <div className="flex items-center my-6">
           <hr className="flex-grow border-t" />
-          <span className="mx-2 text-sm text-gray-500">
-            Atau masuk dengan Google
-          </span>
+          <span className="mx-2 text-sm text-gray-500">Atau masuk dengan</span>
           <hr className="flex-grow border-t" />
         </div>
 
-        <div className="flex">
-          <button
-            className="flex items-center justify-center w-full border rounded py-2 hover:bg-gray-50"
-            onClick={() => {
-              window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`;
-            }}
-          >
-            <FcGoogle className="mr-2 text-red-600 text-lg" />
-            <span className="text-sm font-medium">Google</span>
-          </button>
-        </div>
-        {/* Footer Link */}
+        <button
+          className="flex items-center justify-center w-full border border-gray-300 rounded py-2 bg-white hover:bg-gray-100 transition"
+          onClick={() => {
+            window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`;
+          }}
+        >
+          <FcGoogle className="mr-2 h-5 w-5" />
+          <span className="text-sm font-medium text-gray-700">
+            Masuk dengan Google
+          </span>
+        </button>
+
         <p className="text-center text-sm text-gray-600 mt-4">
           Belum punya akun?{' '}
           <Link href="/Register_User" className="text-blue-600 hover:underline">

@@ -57,6 +57,11 @@ export async function resetPassword(token: string, newPassword: string) {
   return response.data;
 }
 
+export async function getProfileUser() {
+  const response = await api.get('/api/profile');
+  return response.data;
+}
+
 export async function getProfileTenant() {
   const response = await api.get('/api/profile/tenant');
   return response.data;
@@ -196,4 +201,57 @@ export async function setPeakSeasonRate(
 export async function getRoomById(id: number) {
   const res = await api.get(`/api/room/${id}`);
   return res.data;
+}
+
+type CatalogQuery = {
+  search?: string;
+  categoryId?: number;
+  sortBy?: 'name' | 'price';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  pageSize?: number;
+  capacity?: number;
+  startDate?: Date;
+  endDate?: Date;
+};
+
+export async function getCatalogProperties(query: CatalogQuery) {
+  const params = new URLSearchParams();
+
+  if (query.search) params.append('search', query.search);
+  if (query.categoryId)
+    params.append('categoryId', query.categoryId.toString());
+  if (query.sortBy) params.append('sortBy', query.sortBy);
+  if (query.sortOrder) params.append('sortOrder', query.sortOrder);
+  if (query.page) params.append('page', query.page.toString());
+  if (query.pageSize) params.append('pageSize', query.pageSize.toString());
+  if (query.capacity) params.append('capacity', query.capacity.toString());
+  if (query.startDate)
+    params.append('startDate', query.startDate.toISOString());
+  if (query.endDate) params.append('endDate', query.endDate.toISOString());
+
+  const response = await api.get('/api/catalog', { params });
+
+  return response.data;
+}
+
+export async function getPropertyDetail(
+  propertyId: number,
+  startDate?: Date,
+  endDate?: Date,
+) {
+  const params = new URLSearchParams();
+
+  if (startDate) {
+    params.append('startDate', startDate.toISOString());
+  }
+
+  if (endDate) {
+    params.append('endDate', endDate.toISOString());
+  }
+
+  const response = await api.get(
+    `/api/property-detail/${propertyId}?${params.toString()}`,
+  );
+  return response.data.data;
 }

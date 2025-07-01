@@ -153,7 +153,7 @@ export default function TenantRoomTable({ rooms, setRooms }: Props) {
         {rooms.length === 0 && (
           <tr>
             <td colSpan={5} className="p-4 text-center text-gray-500">
-              No properties found.
+              No Room found.
             </td>
           </tr>
         )}

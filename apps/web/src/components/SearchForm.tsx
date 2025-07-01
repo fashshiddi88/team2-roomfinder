@@ -1,30 +1,41 @@
 // src/components/SearchForm.js
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
+import { getAllCities, getCatalogProperties } from '@/lib/api/axios';
+import { toast } from 'sonner';
+import 'react-datepicker/dist/react-datepicker.css';
 
 export default function SearchForm() {
-  const [destination, setDestination] = useState('');
   const [checkInDate, setCheckInDate] = useState<Date | null>(null);
   const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
   const [guests, setGuests] = useState(1);
-  
-  const cities = [
-    "Jakarta", "Bali", "Bandung", "Yogyakarta", "Surabaya",
-    "Lombok", "Medan", "Makassar", "Semarang", "Palembang"
-  ];
+  const [cities, setCities] = useState<{ id: number; name: string }[]>([]);
+  const [selectedCityId, setSelectedCityId] = useState<string>('');
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const data = await getAllCities();
+        setCities(data);
+      } catch (err) {
+        toast.error('Gagal memuat data kota');
+      }
+    };
+    fetchCities();
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Logic pencarian akan diimplementasi kemudian
-    console.log({
-      destination,
-      checkInDate,
-      checkOutDate,
-      guests
-    });
+    if (!checkInDate || !checkOutDate || !selectedCityId) return;
+
+    router.push(
+      `/Explore?cityId=${selectedCityId}&checkIn=${checkInDate.toISOString()}&checkOut=${checkOutDate.toISOString()}&guests=${guests}`,
+    );
   };
 
   return (
@@ -32,25 +43,28 @@ export default function SearchForm() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Destination */}
         <div className="relative">
-          <label htmlFor="destination" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="destination"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Destination
           </label>
           <select
-            id="destination"
-            value={destination}
-            onChange={(e) => setDestination(e.target.value)}
+            id="cityId"
+            value={selectedCityId}
+            onChange={(e) => setSelectedCityId(e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
             required
           >
             <option value="">Choose City</option>
             {cities.map((city) => (
-              <option key={city} value={city}>
-                {city}
+              <option key={city.id} value={city.id}>
+                {city.name}
               </option>
             ))}
           </select>
         </div>
-        
+
         {/* Check-in Date */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -68,7 +82,7 @@ export default function SearchForm() {
             required
           />
         </div>
-        
+
         {/* Check-out Date */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -86,16 +100,19 @@ export default function SearchForm() {
             required
           />
         </div>
-        
+
         {/* Guests */}
         <div>
-          <label htmlFor="guests" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="guests"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Guest
           </label>
           <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
             <button
               type="button"
-              onClick={() => setGuests(prev => Math.max(1, prev - 1))}
+              onClick={() => setGuests((prev) => Math.max(1, prev - 1))}
               className="px-3 py-3 bg-gray-100 text-gray-600 hover:bg-gray-200"
             >
               -
@@ -111,7 +128,7 @@ export default function SearchForm() {
             />
             <button
               type="button"
-              onClick={() => setGuests(prev => Math.min(10, prev + 1))}
+              onClick={() => setGuests((prev) => Math.min(10, prev + 1))}
               className="px-3 py-3 bg-gray-100 text-gray-600 hover:bg-gray-200"
             >
               +
@@ -119,13 +136,13 @@ export default function SearchForm() {
           </div>
         </div>
       </div>
-      
+
       <div className="pt-4">
         <button
           type="submit"
           className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
         >
-          Find a Stay
+          Cari
         </button>
       </div>
     </form>
