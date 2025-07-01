@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useParams } from 'next/navigation';
 import {
   hardDeleteProperty,
   restoreProperty,
@@ -9,20 +10,18 @@ import {
 import Swal from 'sweetalert2';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { PropertyType } from '@/types/property';
+import { RoomType } from '@/types/property';
 
 type Props = {
-  properties: PropertyType[];
-  setProperties: React.Dispatch<React.SetStateAction<PropertyType[]>>;
+  rooms: RoomType[];
+  setRooms: React.Dispatch<React.SetStateAction<RoomType[]>>;
 };
 
-export default function TenantPropertyTable({
-  properties,
-  setProperties,
-}: Props) {
+export default function TenantRoomTable({ rooms, setRooms }: Props) {
+  const { propertyId } = useParams();
   const handleArchive = async (id: number) => {
     const result = await Swal.fire({
-      title: 'Yakin ingin menonaktifkan properti ini?',
+      title: 'Yakin ingin menonaktifkan room ini?',
       text: 'Properti akan ditandai sebagai tidak tersedia.',
       icon: 'warning',
       showCancelButton: true,
@@ -35,10 +34,10 @@ export default function TenantPropertyTable({
     if (result.isConfirmed) {
       try {
         await softDeleteProperty(id);
-        setProperties((prev) =>
+        setRooms((prev) =>
           prev.map((p) => (p.id === id ? { ...p, deletedAt: new Date() } : p)),
         );
-        toast.success('Property berhasil ditandai tidak tersedia');
+        toast.success('Room berhasil ditandai tidak tersedia');
       } catch {
         toast.error('Gagal menghapus property');
       }
@@ -47,8 +46,8 @@ export default function TenantPropertyTable({
 
   const handleUnarchive = async (id: number) => {
     const result = await Swal.fire({
-      title: 'Buka arsip properti?',
-      text: 'Properti akan tersedia kembali.',
+      title: 'Buka arsip room?',
+      text: 'Room akan tersedia kembali.',
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Ya, tampilkan!',
@@ -58,20 +57,20 @@ export default function TenantPropertyTable({
     if (result.isConfirmed) {
       try {
         await restoreProperty(id);
-        setProperties((prev) =>
+        setRooms((prev) =>
           prev.map((p) => (p.id === id ? { ...p, deletedAt: null } : p)),
         );
-        toast.success('Properti berhasil diaktifkan kembali.');
+        toast.success('Room berhasil diaktifkan kembali.');
       } catch {
-        toast.error('Gagal mengaktifkan kembali properti.');
+        toast.error('Gagal mengaktifkan kembali room.');
       }
     }
   };
 
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
-      title: 'Yakin ingin menghapus properti ini?',
-      text: 'Properti akan dihapus dari property anda.',
+      title: 'Yakin ingin menghapus room ini?',
+      text: 'Properti akan dihapus dari room anda.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -83,10 +82,10 @@ export default function TenantPropertyTable({
     if (result.isConfirmed) {
       try {
         await hardDeleteProperty(id);
-        setProperties((prev) => prev.filter((p) => p.id !== id));
-        toast.success('Property berhasil dihapus');
+        setRooms((prev) => prev.filter((p) => p.id !== id));
+        toast.success('room berhasil dihapus');
       } catch {
-        toast.error('Gagal menghapus property');
+        toast.error('Gagal menghapus room');
       }
     }
   };
@@ -96,40 +95,26 @@ export default function TenantPropertyTable({
         <tr>
           <th className="p-4">Image</th>
           <th className="p-4">Name</th>
-          <th className="p-4">Category</th>
-          <th className="p-4">Status</th>
-          <th className="p-4">Room</th>
+          <th className="p-4">Peak Season</th>
           <th className="p-4">Action</th>
         </tr>
       </thead>
       <tbody>
-        {properties.map((property) => (
-          <tr key={property.id} className="border-b hover:bg-gray-50 h-24">
+        {rooms.map((room) => (
+          <tr key={room.id} className="border-b hover:bg-gray-50 h-24">
             <td className="p-4">
               <Image
-                src={property.image || '/urban_loft.jpg'}
-                alt={property.name}
+                src={room.image || '/urban_loft.jpg'}
+                alt={room.name}
                 width={80}
                 height={80}
                 className="rounded-lg object-cover"
               />
             </td>
-            <td className="p-4 font-semibold">{property.name}</td>
-            <td className="p-4">{property.category?.name || '-'}</td>
-            <td className="p-4">
-              <span
-                className={`px-2 py-1 rounded text-sm font-medium ${
-                  property.deletedAt === null
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-red-100 text-red-700'
-                }`}
-              >
-                {property.deletedAt === null ? 'Available' : 'Unavailable'}
-              </span>
-            </td>
-            <td className="p-4">
+            <td className="p-4 font-semibold">{room.name}</td>
+            <td className="p-4 font-semibold">
               <Link
-                href={`/Tenant_Property/Manage_Rooms/${property.id}`}
+                href={`/Tenant_Property/Manage_Rooms/${propertyId}/Peak_Season/${room.id}`}
                 className="text-blue-600 hover:underline mr-4"
               >
                 Manage
@@ -137,27 +122,27 @@ export default function TenantPropertyTable({
             </td>
             <td className="p-4 whitespace-nowrap">
               <Link
-                href={`/Tenant_Property/${property.id}`}
+                href={`/Tenant_Property/${room.id}`}
                 className="text-blue-600 hover:underline mr-4"
               >
                 Edit
               </Link>
               <button
                 onClick={() =>
-                  property.deletedAt
-                    ? handleUnarchive(property.id)
-                    : handleArchive(property.id)
+                  room.deletedAt
+                    ? handleUnarchive(room.id)
+                    : handleArchive(room.id)
                 }
                 className={`${
-                  property.deletedAt
+                  room.deletedAt
                     ? 'text-green-600 hover:underline mr-4'
                     : 'text-yellow-600 hover:underline mr-4'
                 }`}
               >
-                {property.deletedAt ? 'Unarchive' : 'Archive'}
+                {room.deletedAt ? 'Unarchive' : 'Archive'}
               </button>
               <button
-                onClick={() => handleDelete(property.id)}
+                onClick={() => handleDelete(room.id)}
                 className="text-red-600 hover:underline"
               >
                 Delete
@@ -165,7 +150,7 @@ export default function TenantPropertyTable({
             </td>
           </tr>
         ))}
-        {properties.length === 0 && (
+        {rooms.length === 0 && (
           <tr>
             <td colSpan={5} className="p-4 text-center text-gray-500">
               No properties found.

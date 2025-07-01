@@ -178,4 +178,74 @@ export class RoomService {
       },
     });
   }
+
+  async getRoomsByProperty(propertyId: number, userId: number) {
+    const tenant = await prisma.tenant.findUnique({ where: { userId } });
+    if (!tenant) throw new Error('Tenant not found');
+
+    const property = await prisma.property.findFirst({
+      where: { id: propertyId, tenantId: tenant.id },
+    });
+    if (!property) throw new Error('Property not found or access denied');
+
+    return prisma.room.findMany({
+      where: {
+        propertyId,
+        deletedAt: null,
+      },
+      include: {
+        availabilities: true,
+        peakRates: true,
+      },
+    });
+  }
+
+  async getRoomById(roomId: number, userId: number) {
+    const tenant = await prisma.tenant.findUnique({
+      where: { userId },
+    });
+    if (!tenant) throw new Error('Tenant not found');
+
+    const room = await prisma.room.findFirst({
+      where: {
+        id: roomId,
+        property: { tenantId: tenant.id },
+      },
+      include: {
+        property: true,
+        availabilities: true,
+        peakRates: true,
+      },
+    });
+
+    if (!room) throw new Error('Room not found or access denied');
+
+    return room;
+  }
+
+  //public
+  async getPublicRoomById(roomId: number) {
+    const room = await prisma.room.findFirst({
+      where: {
+        id: roomId,
+        deletedAt: null,
+        property: {
+          deletedAt: null,
+        },
+      },
+      include: {
+        property: {
+          include: {
+            city: true,
+            category: true,
+          },
+        },
+        availabilities: true,
+        peakRates: true,
+      },
+    });
+
+    if (!room) throw new Error('Room not found');
+    return room;
+  }
 }

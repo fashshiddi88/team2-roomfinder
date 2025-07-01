@@ -182,4 +182,76 @@ export class RoomController {
       return res.status(500).json({ message: err.message });
     }
   }
+
+  async getRoomsByProperty(req: Request, res: Response) {
+    try {
+      const tenant = (req as any).user;
+
+      if (!tenant || tenant.role !== 'TENANT') {
+        return res.status(403).json({
+          message: 'Forbidden: Only tenants can view this data',
+        });
+      }
+
+      const propertyId = Number(req.params.propertyId);
+      if (isNaN(propertyId)) {
+        return res.status(400).json({ message: 'Invalid property ID' });
+      }
+
+      const rooms = await this.roomService.getRoomsByProperty(
+        propertyId,
+        tenant.userId,
+      );
+
+      return res.status(200).json({
+        message: 'Rooms fetched successfully',
+        data: rooms,
+      });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async getRoomById(req: Request, res: Response) {
+    try {
+      const tenant = (req as any).user;
+      if (!tenant || tenant.role !== 'TENANT') {
+        return res
+          .status(403)
+          .json({ message: 'Forbidden: Only tenants can access this' });
+      }
+
+      const roomId = Number(req.params.roomId);
+      if (isNaN(roomId)) {
+        return res.status(400).json({ message: 'Invalid room ID' });
+      }
+
+      const room = await this.roomService.getRoomById(roomId, tenant.userId);
+
+      return res.status(200).json({
+        message: 'Room fetched successfully',
+        data: room,
+      });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  //public
+  async getPublicRoomById(req: Request, res: Response) {
+    try {
+      const roomId = Number(req.params.roomId);
+      if (isNaN(roomId)) {
+        return res.status(400).json({ message: 'Invalid room ID' });
+      }
+
+      const room = await this.roomService.getPublicRoomById(roomId);
+      return res.status(200).json({
+        message: 'Room fetched successfully',
+        data: room,
+      });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
 }

@@ -25,5 +25,14 @@ export class PeakSeasonRateRouter {
         this.peakSeasonRateController,
       ),
     );
+
+    this.router.get(
+      '/property/rooms/:roomId/peak-seasons',
+      AuthenticationMiddleware.verifyToken,
+      AuthorizationMiddleware.allowRoles('TENANT'),
+      this.peakSeasonRateController.getPeakSeasonsByRoomId.bind(
+        this.peakSeasonRateController,
+      ),
+    );
   }
 }

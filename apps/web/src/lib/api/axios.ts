@@ -145,3 +145,55 @@ export async function getPropertyById(id: number | string) {
   const res = await api.get(`/api/property/${id}`);
   return res.data;
 }
+
+export async function getTenantRooms() {
+  const response = await api.get('/api/property/my-rooms');
+  return response.data;
+}
+
+export async function getRoomsByProperty(propertyId: number | string) {
+  const res = await api.get(`/api/property/${propertyId}/rooms`);
+  return res.data;
+}
+
+export async function createRoom(propertyId: number, formData: FormData) {
+  const response = await api.post(
+    `/api/property/${propertyId}/rooms`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  );
+  return response.data;
+}
+
+export async function getPeakSeasonsByRoomId(
+  roomId: number,
+  page = 1,
+  limit = 5,
+) {
+  const res = await api.get(`/api/property/rooms/${roomId}/peak-seasons`, {
+    params: { page, limit },
+  });
+  return res.data;
+}
+
+export async function setPeakSeasonRate(
+  roomId: number,
+  payload: {
+    startDate: string;
+    endDate: string;
+    priceModifierType: 'PERCENTAGE' | 'NOMINAL';
+    priceModifierValue: number;
+  },
+) {
+  const response = await api.post(`/api/room/${roomId}/peak-season`, payload);
+  return response.data;
+}
+
+export async function getRoomById(id: number) {
+  const res = await api.get(`/api/room/${id}`);
+  return res.data;
+}

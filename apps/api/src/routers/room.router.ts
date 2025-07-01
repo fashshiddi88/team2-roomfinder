@@ -57,5 +57,23 @@ export class RoomRouter {
       AuthorizationMiddleware.allowRoles('TENANT'),
       this.roomController.getTenantRooms.bind(this.roomController),
     );
+    this.router.get(
+      '/property/:propertyId/rooms',
+      AuthenticationMiddleware.verifyToken,
+      AuthorizationMiddleware.allowRoles('TENANT'),
+      this.roomController.getRoomsByProperty.bind(this.roomController),
+    );
+
+    this.router.get(
+      '/room/:roomId',
+      AuthenticationMiddleware.verifyToken,
+      AuthorizationMiddleware.allowRoles('TENANT'),
+      this.roomController.getRoomById.bind(this.roomController),
+    );
+
+    this.router.get(
+      '/room-detail/:roomId',
+      this.roomController.getPublicRoomById.bind(this.roomController),
+    );
   }
 }
