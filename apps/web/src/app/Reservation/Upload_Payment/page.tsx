@@ -7,13 +7,14 @@ import {
   cancelBookingById,
   uploadPaymentProof,
 } from '@/lib/api/axios';
+import { withAuthRoles } from '@/middleware/withAuthRoles';
 import { BookingSummary } from '@/types/property';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import LoadingScreen from '@/components/LoadingScreen';
 import Swal from 'sweetalert2';
 
-export default function UploadPaymentPage() {
+function UploadPaymentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const bookingId = Number(searchParams.get('bookingId'));
@@ -267,3 +268,4 @@ export default function UploadPaymentPage() {
     </main>
   );
 }
+export default withAuthRoles(['USER'])(UploadPaymentPage);

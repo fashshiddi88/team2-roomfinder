@@ -7,12 +7,13 @@ import {
   getPropertyDetail,
   createBooking,
 } from '@/lib/api/axios';
+import { withAuthRoles } from '@/middleware/withAuthRoles';
 import { toast } from 'sonner';
 import type { Property, BookingTypeEnum } from '@/types/property';
 import Image from 'next/image';
 import LoadingScreen from '@/components/LoadingScreen';
 
-export default function BookingPage() {
+function BookingPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -121,9 +122,7 @@ export default function BookingPage() {
         name: user?.name || inputName,
       });
 
-      const responseData = res.data || {};
-      const booking = responseData.booking || res.data;
-      const paymentUrl = responseData.paymentUrl || null;
+      const { booking, paymentUrl } = res.data;
 
       if (!booking) {
         toast.error('Booking gagal: data tidak lengkap');
@@ -282,3 +281,4 @@ export default function BookingPage() {
     </div>
   );
 }
+export default withAuthRoles(['USER'])(BookingPage);

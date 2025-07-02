@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { BookingTypeEnum } from '@/types/property';
+import { BookingTypeEnum, BookingStatus } from '@/types/property';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -296,4 +296,24 @@ export async function uploadPaymentProof(bookingId: number, file: File) {
   );
 
   return response.data;
+}
+
+export async function getTenantBookings(status?: BookingStatus) {
+  const query = status ? `?status=${status}` : '';
+  const response = await api.get(`/api/dashboard/bookings/tenant${query}`);
+  return response.data.data;
+}
+
+export async function acceptBookingByTenant(bookingId: number) {
+  const response = await api.patch(
+    `/api/dashboard/bookings/${bookingId}/accept`,
+  );
+  return response.data.detail;
+}
+
+export async function rejectBookingByTenant(bookingId: number) {
+  const response = await api.patch(
+    `/api/dashboard/bookings/${bookingId}/reject`,
+  );
+  return response.data.detail;
 }

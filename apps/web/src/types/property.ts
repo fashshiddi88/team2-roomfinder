@@ -75,3 +75,13 @@ export type BookingSummary = {
   userName: string;
   userEmail: string;
 };
+
+export enum BookingStatus {
+  WAITING_PAYMENT = 'WAITING_PAYMENT',
+  WAITING_CONFIRMATION = 'WAITING_CONFIRMATION',
+  CANCELED = 'CANCELED',
+  CONFIRMED = 'CONFIRMED',
+  DONE = 'DONE',
+  REJECTED = 'REJECTED',
+  EXPIRED = 'EXPIRED',
+}

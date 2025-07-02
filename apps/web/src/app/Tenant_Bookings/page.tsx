@@ -1,74 +1,68 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import {
+  getTenantBookings,
+  acceptBookingByTenant,
+  rejectBookingByTenant,
+} from '@/lib/api/axios';
+import { BookingStatus } from '@/types/property';
 import { withAuthRoles } from '@/middleware/withAuthRoles';
 import TenantSidebar from '../Tenant_Navbar/page';
 import { User, Calendar, Check, X, Eye } from 'lucide-react';
-
-type StatusType = 'Confirmed' | 'Pending' | 'Rejected';
-
-const tabs = ['Semua', 'Menunggu Approval', 'Approved', 'Rejected'];
+import Swal from 'sweetalert2';
 
 function TenantBookingsPage() {
-  const [activeTab, setActiveTab] = useState('Semua');
-  const [bookings, setBookings] = useState([
-    {
-      id: '1',
-      property: 'Villa Serenity',
-      date: '2025-06-10 to 2025-06-15',
-      status: 'Confirmed' as StatusType,
-      user: {
-        name: 'John Doe',
-        email: 'john@example.com',
-      },
-    },
-    {
-      id: '2',
-      property: 'Beachfront Escape',
-      date: '2025-07-01 to 2025-07-05',
-      status: 'Pending' as StatusType,
-      user: {
-        name: 'Jane Smith',
-        email: 'jane@example.com',
-      },
-    },
-    {
-      id: '3',
-      property: 'Mountain View Cabin',
-      date: '2025-06-25 to 2025-06-27',
-      status: 'Pending' as StatusType,
-      user: {
-        name: 'Robert Lang',
-        email: 'robert@example.com',
-      },
-    },
-    {
-      id: '4',
-      property: 'Urban Apartment',
-      date: '2025-07-10 to 2025-07-12',
-      status: 'Rejected' as StatusType,
-      user: {
-        name: 'Alice Green',
-        email: 'alice@example.com',
-      },
-    },
-  ]);
+  const tabs = ['All', 'Waiting Payment', 'Waiting Confirmation', 'Confirmed'];
+  const [activeTab, setActiveTab] = useState('All');
+  const [bookings, setBookings] = useState<any[]>([]);
 
-  const handleAction = (id: string, action: StatusType) => {
-    setBookings((prev) =>
-      prev.map((booking) =>
-        booking.id === id ? { ...booking, status: action } : booking,
-      ),
-    );
+  const fetchBookings = async () => {
+    try {
+      const data = await getTenantBookings();
+      setBookings(data);
+    } catch (error) {
+      console.error('Error fetching tenant bookings:', error);
+    }
   };
 
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
   const filteredBookings = bookings.filter((booking) => {
-    if (activeTab === 'Semua') return true;
-    if (activeTab === 'Menunggu Approval') return booking.status === 'Pending';
-    if (activeTab === 'Approved') return booking.status === 'Confirmed';
-    if (activeTab === 'Rejected') return booking.status === 'Rejected';
-    return false;
+    if (activeTab === 'All') return true;
+    if (activeTab === 'Waiting Payment')
+      return booking.status === 'WAITING_PAYMENT';
+    if (activeTab === 'Waiting Confirmation')
+      return booking.status === 'WAITING_CONFIRMATION';
+    if (activeTab === 'Confirmed') return booking.status === 'CONFIRMED';
+    return booking.status === activeTab.toUpperCase();
   });
+
+  const handleAction = async (bookingId: number, newStatus: BookingStatus) => {
+    const confirm = await Swal.fire({
+      title: `Sudah periksa bukti? Apakah anda yakin untuk ${newStatus === 'CONFIRMED' ? 'approve' : 'reject'}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+      if (newStatus === BookingStatus.CONFIRMED) {
+        await acceptBookingByTenant(bookingId);
+        Swal.fire('Approved', 'Booking has been approved.', 'success');
+      } else if (newStatus === BookingStatus.REJECTED) {
+        await rejectBookingByTenant(bookingId);
+        Swal.fire('Rejected', 'Booking has been rejected.', 'success');
+      }
+      await fetchBookings();
+    } catch (error) {
+      console.error('Update failed:', error);
+    }
+  };
 
   return (
     <div className="flex">
@@ -115,11 +109,11 @@ function TenantBookingsPage() {
                   </span>
                   <span
                     className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                      booking.status === 'Confirmed'
+                      booking.status === 'CONFIRMED'
                         ? 'bg-green-100 text-green-700'
-                        : booking.status === 'Rejected'
-                          ? 'bg-red-100 text-red-700'
-                          : 'bg-yellow-100 text-yellow-700'
+                        : booking.status === 'WAITING_CONFIRMATION'
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : 'bg-red-100 text-red-700'
                     }`}
                   >
                     {booking.status}
@@ -127,19 +121,23 @@ function TenantBookingsPage() {
                 </div>
               </div>
 
-              {booking.status === 'Pending' && (
+              {booking.status === 'WAITING_CONFIRMATION' && (
                 <div className="flex gap-2 mt-4 md:mt-0">
                   <button className="px-3 py-1 border text-sm rounded-lg hover:bg-gray-50 flex items-center gap-1">
                     <Eye size={14} /> Lihat Bukti
                   </button>
                   <button
-                    onClick={() => handleAction(booking.id, 'Rejected')}
+                    onClick={() =>
+                      handleAction(booking.id, BookingStatus.REJECTED)
+                    }
                     className="px-3 py-1 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg text-sm flex items-center gap-1"
                   >
                     <X size={14} /> Reject
                   </button>
                   <button
-                    onClick={() => handleAction(booking.id, 'Confirmed')}
+                    onClick={() =>
+                      handleAction(booking.id, BookingStatus.CONFIRMED)
+                    }
                     className="px-3 py-1 bg-green-100 text-green-700 hover:bg-green-200 rounded-lg text-sm flex items-center gap-1"
                   >
                     <Check size={14} /> Approve
