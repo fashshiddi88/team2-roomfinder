@@ -63,30 +63,20 @@ export class PropertyExploreService {
       }
 
       // Hitung effectivePrice
-      let totalPrice = 0;
-      if (days.length > 0) {
-        for (const day of days) {
-          const peak = room.peakRates.find(
-            (rate) => day >= rate.startDate && day <= rate.endDate,
-          );
+      const firstDay = days[0];
+      let price = room.basePrice;
+      const peak = room.peakRates.find(
+        (rate) => firstDay >= rate.startDate && firstDay <= rate.endDate,
+      );
 
-          let price = room.basePrice;
-          if (peak) {
-            if (peak.priceModifierType === 'PERCENTAGE') {
-              price += (price * peak.priceModifierValue) / 100;
-            } else if (peak.priceModifierType === 'NOMINAL') {
-              price += peak.priceModifierValue;
-            }
-          }
-
-          totalPrice += price;
-        }
-      } else {
-        totalPrice = room.basePrice;
+      if (peak) {
+        price +=
+          peak.priceModifierType === 'PERCENTAGE'
+            ? (price * peak.priceModifierValue) / 100
+            : peak.priceModifierValue;
       }
 
-      const effectivePrice =
-        days.length > 0 ? Math.round(totalPrice / days.length) : room.basePrice;
+      const effectivePrice = Math.round(price);
 
       return {
         id: room.id,

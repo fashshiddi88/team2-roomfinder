@@ -67,6 +67,7 @@ export type BookingSummary = {
   checkOutDate: string;
   totalPrice: number;
   bookingType: 'MANUAL' | 'GATEWAY';
+  expiredAt: string;
   status: string;
   propertyName: string;
   location: string;

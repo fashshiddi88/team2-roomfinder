@@ -330,7 +330,9 @@ export class BookingService {
           select: {
             name: true,
             address: true,
-            city: true,
+            city: {
+              select: { name: true },
+            },
           },
         },
         room: {
@@ -359,8 +361,9 @@ export class BookingService {
       totalPrice: booking.totalPrice,
       bookingType: booking.bookingType,
       status: booking.status,
+      expiredAt: booking.expiredAt,
       propertyName: booking.property.name,
-      location: `${booking.property.address}, ${booking.property.city}`,
+      location: `${booking.property.address}, ${booking.property.city.name}`,
       roomName: booking.room.name,
       userName: booking.user.name,
       userEmail: booking.user.email,

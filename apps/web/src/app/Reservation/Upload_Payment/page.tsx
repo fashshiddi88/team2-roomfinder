@@ -2,10 +2,16 @@
 
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getBookingById } from '@/lib/api/axios';
+import {
+  getBookingById,
+  cancelBookingById,
+  uploadPaymentProof,
+} from '@/lib/api/axios';
 import { BookingSummary } from '@/types/property';
+import { toast } from 'sonner';
 import Image from 'next/image';
 import LoadingScreen from '@/components/LoadingScreen';
+import Swal from 'sweetalert2';
 
 export default function UploadPaymentPage() {
   const router = useRouter();
@@ -13,80 +19,142 @@ export default function UploadPaymentPage() {
   const bookingId = Number(searchParams.get('bookingId'));
   const [summary, setSummary] = useState<BookingSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hours, setHours] = useState(0);
+  const [minutes, setMinutes] = useState(0);
+  const [seconds, setSeconds] = useState(0);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
+    if (!summary) return;
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const expired = new Date(summary.expiredAt).getTime();
+      const distance = expired - now;
+
+      if (distance <= 0) {
+        clearInterval(interval);
+        setHours(0);
+        setMinutes(0);
+        setSeconds(0);
+        return;
+      }
+
+      setHours(Math.floor((distance / (1000 * 60 * 60)) % 24));
+      setMinutes(Math.floor((distance / (1000 * 60)) % 60));
+      setSeconds(Math.floor((distance / 1000) % 60));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [summary]);
+
+  function formatTanggalIndonesia(dateString: string): string {
+    const utcDate = new Date(dateString);
+    const localDate = new Date(utcDate.getTime() + 7 * 60 * 60 * 1000);
+
+    return new Intl.DateTimeFormat('id-ID', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    }).format(localDate);
+  }
+
+  useEffect(() => {
+    if (!bookingId) return;
+
     const fetchBooking = async () => {
       try {
-        const data = await getBookingById(bookingId);
-        setSummary(data);
-        // Optional: hitung countdown dari expiredAt jika ada
-      } catch (error) {
-        console.error('Gagal fetch booking:', error);
+        const res = await getBookingById(bookingId);
+        setSummary(res);
+      } catch (err: any) {
+        toast.error(err.response?.data?.message || 'Gagal ambil data booking');
       } finally {
         setLoading(false);
       }
     };
 
-    if (bookingId) fetchBooking();
+    fetchBooking();
   }, [bookingId]);
-
-  // ------ Dummy summary pulled from query params or placeholder ------
-
-  // ------ Countdown timer (2 hours) ------
-  const [remaining, setRemaining] = useState<number>(() => {
-    // Persist the deadline in sessionStorage so a refresh doesn't reset it.
-    const stored = sessionStorage.getItem('deadline-' + summary.reservationId);
-    const deadline = stored
-      ? new Date(stored)
-      : new Date(Date.now() + 2 * 60 * 60 * 1000);
-    if (!stored)
-      sessionStorage.setItem(
-        'deadline-' + summary.reservationId,
-        deadline.toISOString(),
-      );
-    return deadline.getTime() - Date.now();
-  });
-
   useEffect(() => {
-    const id = setInterval(() => setRemaining((prev) => prev - 1000), 1000);
-    return () => clearInterval(id);
-  }, []);
+    if (!summary?.expiredAt) return;
 
-  const hours = Math.max(0, Math.floor(remaining / 3_600_000));
-  const minutes = Math.max(0, Math.floor((remaining % 3_600_000) / 60_000));
-  const seconds = Math.max(0, Math.floor((remaining % 60_000) / 1000));
+    const interval = setInterval(() => {
+      const now = new Date();
+      const expired = new Date(summary.expiredAt);
 
-  function formatTanggalIndonesia(dateString: string): string {
-    const date = new Date(dateString);
+      if (now > expired) {
+        setSummary((prev) => prev && { ...prev, status: 'EXPIRED' });
+        clearInterval(interval);
+      }
+    }, 1000);
 
-    return new Intl.DateTimeFormat('id-ID', {
-      weekday: 'short',
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    }).format(date);
-  }
+    return () => clearInterval(interval);
+  }, [summary?.expiredAt]);
 
-  // ------ Payment proof upload ------
-  const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const handleFile = (e: ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    // Validation: jpg / png under 1 MB
-    if (!/image\/(jpeg|png)/.test(f.type)) {
-      setError('File must be .jpg or .png');
+    if (file.size > 1024 * 1024) {
+      setError('Maksimum ukuran 1MB');
       return;
     }
-    if (f.size > 1_048_576) {
-      setError('File size must be under 1 MB');
-      return;
-    }
+
+    const url = URL.createObjectURL(file);
+    setSelectedFile(file);
+    setPreviewUrl(url);
     setError(null);
-    setFile(f);
-    setPreviewUrl(URL.createObjectURL(f));
+  };
+
+  const handleCancel = async (bookingId: number) => {
+    const result = await Swal.fire({
+      title: 'Batalkan?',
+      text: 'Yakin batalkan reservasi?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Iya',
+      cancelButtonText: 'Tidak',
+      confirmButtonColor: '#d33',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const res = await cancelBookingById(bookingId);
+        toast.success(res.message);
+        router.push('/');
+      } catch (err: any) {
+        toast.error(err.response?.data?.message || 'Failed to cancel booking');
+      }
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedFile || !summary?.id) {
+      toast.error('File atau booking tidak valid');
+      return;
+    }
+
+    try {
+      const res = await uploadPaymentProof(summary.id, selectedFile);
+      console.log('Upload response:', res);
+
+      await Swal.fire({
+        icon: 'success',
+        title: 'Terima kasih!',
+        text: 'Reservasimu akan diproses oleh tenant dan akan ada email dalam 3 hari.',
+        confirmButtonColor: '#3B82F6',
+      });
+
+      router.push('/');
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast.error(
+        error.response?.data?.message || 'Gagal upload bukti pembayaran',
+      );
+    }
   };
 
   if (loading) return <LoadingScreen message="Tunggu Sebentar" />;
@@ -107,7 +175,7 @@ export default function UploadPaymentPage() {
         {/* Summary */}
         <section className="bg-white p-6 rounded-xl shadow grid md:grid-cols-2 gap-6">
           <div>
-            <h2 className="text-lg font-semibold mb-3">Stay details</h2>
+            <h2 className="text-lg font-semibold mb-3">Booking details</h2>
             <ul className="text-sm text-gray-700 space-y-1">
               <li>
                 <span className="font-medium">Property:</span>{' '}
@@ -119,26 +187,36 @@ export default function UploadPaymentPage() {
               </li>
               <li>
                 <span className="font-medium">Check In:</span>{' '}
-                {formatTanggalIndonesia(summary.checkInDate || '')}
+                {formatTanggalIndonesia(summary.checkInDate)}
               </li>
               <li>
                 <span className="font-medium">Check Out:</span>{' '}
-                {formatTanggalIndonesia(summary.checkOutDate || '')}
+                {formatTanggalIndonesia(summary.checkOutDate)}
               </li>
             </ul>
           </div>
-          <div>
-            <h2 className="text-lg font-semibold mb-3">Payment deadline</h2>
-            <p className="text-4xl font-bold tabular-nums">
-              {hours.toString().padStart(2, '0')}:
-              {minutes.toString().padStart(2, '0')}:
-              {seconds.toString().padStart(2, '0')}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Please complete the payment within 2 hours to avoid automatic
-              cancellation.
-            </p>
-          </div>
+          {
+            <div>
+              <h2 className="text-lg font-semibold mb-3">Payment deadline</h2>
+              <p className="text-4xl font-bold tabular-nums">
+                {hours.toString().padStart(2, '0')}:
+                {minutes.toString().padStart(2, '0')}:
+                {seconds.toString().padStart(2, '0')}
+              </p>
+              {summary.status === 'EXPIRED' ? (
+                <div className="bg-red-100 rounded-md w-2/3">
+                  <p className="text-sm font-medium  text-red-700 px-3 py-2 ">
+                    This booking has expired.
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 mt-1">
+                  Please complete the payment within 1 hour to avoid automatic
+                  cancellation.
+                </p>
+              )}
+            </div>
+          }
         </section>
 
         {/* Upload proof */}
@@ -163,13 +241,13 @@ export default function UploadPaymentPage() {
           {error && <p className="text-red-600 text-sm">{error}</p>}
           <div className="flex gap-4">
             <button
-              onClick={handleSubmit}
+              onClick={() => handleSubmit()}
               className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
             >
               Submit Proof
             </button>
             <button
-              onClick={handleCancel}
+              onClick={() => handleCancel(summary.id)}
               className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition"
             >
               Cancel Reservation

@@ -32,7 +32,7 @@ export class BookingController {
         return res.status(400).json({ message: 'Invalid date format' });
       }
 
-      const booking = await this.bookingService.createBooking({
+      const result = await this.bookingService.createBooking({
         userId,
         propertyId: Number(propertyId),
         roomId: Number(roomId),
@@ -44,7 +44,7 @@ export class BookingController {
 
       return res.status(201).json({
         message: 'Booking created successfully',
-        data: booking,
+        data: result,
       });
     } catch (error: any) {
       return res.status(500).json({ message: error.message });

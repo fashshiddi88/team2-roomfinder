@@ -51,7 +51,7 @@ export class BookingRouter {
       '/bookings/:id',
       AuthenticationMiddleware.verifyToken,
       AuthorizationMiddleware.allowRoles('USER'),
-      this.bookingController.getUserBookings.bind(this.bookingController),
+      this.bookingController.getBookingById.bind(this.bookingController),
     );
   }
 }

@@ -275,3 +275,25 @@ export async function getBookingById(bookingId: number) {
   const response = await api.get(`/api/bookings/${bookingId}`);
   return response.data.data; // hasil: object detail booking
 }
+
+export async function cancelBookingById(bookingId: number) {
+  const response = await api.delete(`/api/bookings/${bookingId}/cancel`);
+  return response.data;
+}
+
+export async function uploadPaymentProof(bookingId: number, file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await api.post(
+    `/api/bookings/${bookingId}/payment-proof`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  );
+
+  return response.data;
+}

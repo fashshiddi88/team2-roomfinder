@@ -87,6 +87,12 @@ export default function BookingPage() {
     (room) => room.name.toLowerCase() === roomName.toLowerCase(),
   );
 
+  function toMiddayISOString(dateString: string) {
+    const d = new Date(dateString);
+    d.setHours(12, 0, 0, 0);
+    return d.toISOString();
+  }
+
   useEffect(() => {
     if (!isLoading && property && !selectedRoom) {
       toast.error('Kamar tidak ditemukan');
@@ -107,15 +113,22 @@ export default function BookingPage() {
 
     try {
       const res = await createBooking({
-        propertyId: property.id,
+        propertyId: property!.id,
         roomId: selectedRoom.id,
-        startDate: new Date(checkIn).toISOString(),
-        endDate: new Date(checkOut).toISOString(),
+        startDate: toMiddayISOString(checkIn),
+        endDate: toMiddayISOString(checkOut),
         bookingType: paymentMethod as BookingTypeEnum,
         name: user?.name || inputName,
       });
 
-      const { booking, paymentUrl } = res.data.data;
+      const responseData = res.data || {};
+      const booking = responseData.booking || res.data;
+      const paymentUrl = responseData.paymentUrl || null;
+
+      if (!booking) {
+        toast.error('Booking gagal: data tidak lengkap');
+        return;
+      }
 
       toast.success('Pemesanan berhasil dibuat');
 
@@ -125,6 +138,7 @@ export default function BookingPage() {
         router.push(`/Reservation/Upload_Payment?bookingId=${booking.id}`);
       }
     } catch (err: any) {
+      console.error(err.response?.data || err.message || err);
       toast.error(err.response?.data?.message || 'Gagal membuat booking');
     }
   };
