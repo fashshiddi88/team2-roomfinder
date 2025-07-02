@@ -46,5 +46,12 @@ export class BookingRouter {
       AuthorizationMiddleware.allowRoles('USER'),
       this.bookingController.cancelBookingByUser.bind(this.bookingController),
     );
+
+    this.router.get(
+      '/bookings/:id',
+      AuthenticationMiddleware.verifyToken,
+      AuthorizationMiddleware.allowRoles('USER'),
+      this.bookingController.getUserBookings.bind(this.bookingController),
+    );
   }
 }

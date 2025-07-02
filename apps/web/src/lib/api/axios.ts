@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { BookingTypeEnum } from '@/types/property';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -254,4 +255,23 @@ export async function getPropertyDetail(
     `/api/property-detail/${propertyId}?${params.toString()}`,
   );
   return response.data.data;
+}
+
+type CreateBookingPayload = {
+  propertyId: number;
+  roomId: number;
+  startDate: string;
+  endDate: string;
+  bookingType: BookingTypeEnum;
+  name?: string;
+};
+
+export async function createBooking(payload: CreateBookingPayload) {
+  const response = await api.post('/api/bookings', payload);
+  return response.data;
+}
+
+export async function getBookingById(bookingId: number) {
+  const response = await api.get(`/api/bookings/${bookingId}`);
+  return response.data.data; // hasil: object detail booking
 }

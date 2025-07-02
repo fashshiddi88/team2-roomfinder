@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Swal from 'sweetalert2';
 import Image from 'next/image';
 
 type Room = {
@@ -17,17 +19,18 @@ type Props = {
   rooms: Room[];
   checkIn?: string;
   checkOut?: string;
-  totalGuests?: number;
+  guests?: number;
   propertyId: number;
 };
 
-export default function RoomList({
-  rooms,
-  checkIn,
-  checkOut,
-  totalGuests,
-  propertyId,
-}: Props) {
+export default function RoomList({ rooms, propertyId }: Props) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const checkIn = searchParams.get('checkIn') || '';
+  const checkOut = searchParams.get('checkOut') || '';
+  const guests = Number(searchParams.get('guests') || '1');
+
   return (
     <section className="mt-6">
       <h2 className="text-xl font-semibold mb-4">Available Room Types</h2>
@@ -96,7 +99,7 @@ export default function RoomList({
             <div className="flex justify-center items-start">
               <button
                 onClick={() => {
-                  if (!checkIn || !checkOut || totalGuests === 0) {
+                  if (!checkIn || !checkOut || guests === 0) {
                     alert('Please select dates and at least one guest.');
                     return;
                   }
@@ -104,12 +107,28 @@ export default function RoomList({
                   const query = new URLSearchParams({
                     room: room.name,
                     price: room.effectivePrice.toString(),
-                    in: checkIn,
-                    out: checkOut,
+                    checkIn,
+                    checkOut,
                     propertyId: propertyId.toString(),
                   });
 
-                  window.open(`/Reservation?${query.toString()}`, '_blank');
+                  const targetUrl = `/Reservation?${query.toString()}`;
+                  const token = localStorage.getItem('token');
+
+                  if (!token) {
+                    Swal.fire({
+                      icon: 'warning',
+                      title: 'Login Diperlukan',
+                      text: 'Silakan login terlebih dahulu untuk melanjutkan pemesanan.',
+                      confirmButtonText: 'Login',
+                    }).then(() => {
+                      localStorage.setItem('redirectAfterLogin', targetUrl); // simpan tujuan
+                      router.push('/Login');
+                    });
+                    return;
+                  }
+
+                  router.push(targetUrl);
                 }}
                 className="bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold px-4 py-1.5 rounded"
               >

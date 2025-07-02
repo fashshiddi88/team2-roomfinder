@@ -24,9 +24,7 @@ export default function Navbar() {
         setUserId(data.id);
         setName(data.name);
         setProfileImg(data.profilePhoto);
-      } catch (error) {
-        toast.error('Gagal memuat data pengguna.');
-      }
+      } catch (error) {}
     };
     fetchUserData();
   }, []);

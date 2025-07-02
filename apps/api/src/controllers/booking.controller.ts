@@ -135,4 +135,32 @@ export class BookingController {
       return res.status(500).json({ message: error.message });
     }
   }
+
+  public async getBookingById(req: Request, res: Response) {
+    try {
+      const bookingId = Number(req.params.id);
+      const userId = (req as any).user?.userId;
+      if (!userId) {
+        return res
+          .status(401)
+          .json({ message: 'Unauthorized: user not found' });
+      }
+
+      if (isNaN(bookingId)) {
+        return res.status(400).json({ message: 'Booking ID tidak valid' });
+      }
+
+      const booking = await this.bookingService.getBookingById(
+        bookingId,
+        userId,
+      );
+      return res
+        .status(200)
+        .json({ message: 'Booking ditemukan', data: booking });
+    } catch (error: any) {
+      return res
+        .status(500)
+        .json({ message: error.message || 'Terjadi kesalahan' });
+    }
+  }
 }

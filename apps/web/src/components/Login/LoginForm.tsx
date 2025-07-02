@@ -48,7 +48,7 @@ export default function LoginForm() {
       const { access_token, user } = data;
       const { role, id } = user;
 
-      if (role !== 'USER' && role !== 'TENANT') {
+      if (role !== 'USER') {
         toast.error('Akun ini tidak memiliki akses.');
         logout();
         router.replace('/Login');
@@ -58,11 +58,15 @@ export default function LoginForm() {
       login(access_token, role, id);
       toast.success('Login berhasil!');
 
-      if (role === 'TENANT') {
-        router.push('/Tenant_Property');
-      } else {
-        router.push('/'); // ganti dengan path dashboard user
+      const redirect = localStorage.getItem('redirectAfterLogin');
+
+      if (redirect) {
+        localStorage.removeItem('redirectAfterLogin');
+        router.push(redirect);
+        return;
       }
+
+      router.push('/');
     } catch (error: any) {
       console.error(error);
       toast.error(

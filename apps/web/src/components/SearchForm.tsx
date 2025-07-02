@@ -29,12 +29,18 @@ export default function SearchForm() {
     fetchCities();
   }, []);
 
+  function toISOStringWithOffset(date: Date) {
+    const adjusted = new Date(date);
+    adjusted.setHours(12, 0, 0, 0);
+    return adjusted.toISOString();
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkInDate || !checkOutDate || !selectedCityId) return;
 
     router.push(
-      `/Explore?cityId=${selectedCityId}&checkIn=${checkInDate.toISOString()}&checkOut=${checkOutDate.toISOString()}&guests=${guests}`,
+      `/Explore?cityId=${selectedCityId}&checkIn=${toISOStringWithOffset(checkInDate)}&checkOut=${toISOStringWithOffset(checkOutDate)}&guests=${guests}`,
     );
   };
 

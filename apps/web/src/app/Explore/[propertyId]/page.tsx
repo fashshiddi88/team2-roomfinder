@@ -2,7 +2,7 @@
 
 import Navbar from '@/components/navbar';
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { getPropertyDetail } from '@/lib/api/axios';
 import StickySearchBar from '@/components/StickySearchBar/StickySearchBar';
@@ -13,7 +13,9 @@ import SidebarProperty from '@/components/SidebarProperty/SidebarProperty';
 import type { Property } from '@/types/property';
 
 export default function PropertyDetail() {
+  const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const propertyId = Number(params?.propertyId);
 
   const [property, setProperty] = useState<Property | null>(null);
@@ -22,11 +24,22 @@ export default function PropertyDetail() {
   const [guests, setGuests] = useState(1);
 
   useEffect(() => {
+    const checkInParam = searchParams.get('checkIn');
+    const checkOutParam = searchParams.get('checkOut');
+    const guestsParam = searchParams.get('guests');
+
+    const startDate = checkInParam ? new Date(checkInParam) : undefined;
+    const endDate = checkOutParam ? new Date(checkOutParam) : undefined;
+
+    if (checkInParam) setCheckIn(checkInParam);
+    if (checkOutParam) setCheckOut(checkOutParam);
+    if (guestsParam) setGuests(Number(guestsParam));
+
     if (isNaN(propertyId)) return;
 
     const fetchData = async () => {
       try {
-        const data = await getPropertyDetail(propertyId);
+        const data = await getPropertyDetail(propertyId, startDate, endDate);
         setProperty(data);
       } catch (err) {
         toast.error('Gagal mengambil detail properti');
@@ -34,7 +47,7 @@ export default function PropertyDetail() {
     };
 
     fetchData();
-  }, [propertyId]);
+  }, [propertyId, searchParams]);
 
   const handleCheckAvailability = async (
     checkIn: string,
@@ -47,6 +60,15 @@ export default function PropertyDetail() {
     const endDate = new Date(checkOut);
 
     try {
+      // Update URL query params
+      const currentParams = new URLSearchParams(window.location.search);
+      currentParams.set('checkIn', startDate.toISOString());
+      currentParams.set('checkOut', endDate.toISOString());
+      currentParams.set('guests', guests.toString());
+
+      router.replace(`?${currentParams.toString()}`, { scroll: false });
+
+      // Fetch data berdasarkan tanggal baru
       const data = await getPropertyDetail(propertyId, startDate, endDate);
       setProperty(data);
     } catch (err) {

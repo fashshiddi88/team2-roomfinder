@@ -54,3 +54,23 @@ export type Property = {
   reviews: Review[];
   mapEmbedUrl?: string;
 };
+
+export enum BookingTypeEnum {
+  MANUAL = 'MANUAL',
+  GATEWAY = 'GATEWAY',
+}
+
+export type BookingSummary = {
+  id: number;
+  reservationId: string;
+  checkInDate: string;
+  checkOutDate: string;
+  totalPrice: number;
+  bookingType: 'MANUAL' | 'GATEWAY';
+  status: string;
+  propertyName: string;
+  location: string;
+  roomName: string;
+  userName: string;
+  userEmail: string;
+};

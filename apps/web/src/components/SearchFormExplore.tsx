@@ -2,9 +2,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import DatePicker from 'react-datepicker';
-import { getAllCities, getCatalogProperties } from '@/lib/api/axios';
+import { getAllCities } from '@/lib/api/axios';
 import { toast } from 'sonner';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -14,6 +14,12 @@ export default function SearchFormExplore() {
   const [guests, setGuests] = useState(1);
   const [cities, setCities] = useState<{ id: number; name: string }[]>([]);
   const [selectedCityId, setSelectedCityId] = useState<string>('');
+
+  const searchParams = useSearchParams();
+  const cityId = searchParams.get('cityId');
+  const checkInParam = searchParams.get('checkIn');
+  const checkOutParam = searchParams.get('checkOut');
+  const guestsParam = searchParams.get('guests');
 
   const router = useRouter();
 
@@ -29,14 +35,27 @@ export default function SearchFormExplore() {
     fetchCities();
   }, []);
 
+  function toISOStringWithOffset(date: Date) {
+    const adjusted = new Date(date);
+    adjusted.setHours(12, 0, 0, 0);
+    return adjusted.toISOString();
+  }
+
+  useEffect(() => {
+    if (checkInParam) setCheckInDate(new Date(checkInParam));
+    if (checkOutParam) setCheckOutDate(new Date(checkOutParam));
+    if (cityId) setSelectedCityId(cityId);
+    if (guestsParam) setGuests(Number(guestsParam));
+  }, [checkInParam, checkOutParam, cityId, guestsParam]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkInDate || !checkOutDate || !selectedCityId) return;
 
     const params = new URLSearchParams({
       cityId: selectedCityId,
-      checkIn: checkInDate.toISOString(),
-      checkOut: checkOutDate.toISOString(),
+      checkIn: toISOStringWithOffset(checkInDate),
+      checkOut: toISOStringWithOffset(checkOutDate),
       guests: String(guests),
     });
     router.push(`/Explore?${params.toString()}`);

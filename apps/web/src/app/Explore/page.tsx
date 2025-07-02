@@ -122,7 +122,11 @@ export default function ExplorePage() {
                     </p>
                   </div>
                   <button
-                    onClick={() => router.push(`/Explore/${property.id}`)}
+                    onClick={() =>
+                      router.push(
+                        `/Explore/${property.id}?cityId=${cityId}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`,
+                      )
+                    }
                     className="bg-orange-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-orange-600"
                   >
                     Pilih Kamar

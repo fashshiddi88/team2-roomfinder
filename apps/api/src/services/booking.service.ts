@@ -318,4 +318,52 @@ export class BookingService {
 
     return { message: 'Booking canceled successfully' };
   }
+
+  public async getBookingById(id: number, userId: number) {
+    const booking = await prisma.booking.findFirst({
+      where: {
+        id,
+        userId,
+      },
+      include: {
+        property: {
+          select: {
+            name: true,
+            address: true,
+            city: true,
+          },
+        },
+        room: {
+          select: {
+            name: true,
+          },
+        },
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!booking) {
+      throw new Error('Booking tidak ditemukan');
+    }
+
+    return {
+      id: booking.id,
+      reservationId: booking.orderNumber,
+      checkInDate: booking.checkinDate,
+      checkOutDate: booking.checkoutDate,
+      totalPrice: booking.totalPrice,
+      bookingType: booking.bookingType,
+      status: booking.status,
+      propertyName: booking.property.name,
+      location: `${booking.property.address}, ${booking.property.city}`,
+      roomName: booking.room.name,
+      userName: booking.user.name,
+      userEmail: booking.user.email,
+    };
+  }
 }
