@@ -3,22 +3,32 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getBookingById } from '@/lib/api/axios';
+import { BookingSummary } from '@/types/property';
 import Image from 'next/image';
 import LoadingScreen from '@/components/LoadingScreen';
-
-/**
- * ReservationSummary represents data forwarded from the Make Reservation flow.
- * In production these values should be fetched from the backend by reservationId
- * (passed via route params or search params). For now we grab them from the
- * URL query string so the page can work without a backend.
- */
 
 export default function UploadPaymentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const bookingId = Number(searchParams.get('bookingId'));
-  const [summary, setSummary] = useState<any>(null);
+  const [summary, setSummary] = useState<BookingSummary | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBooking = async () => {
+      try {
+        const data = await getBookingById(bookingId);
+        setSummary(data);
+        // Optional: hitung countdown dari expiredAt jika ada
+      } catch (error) {
+        console.error('Gagal fetch booking:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (bookingId) fetchBooking();
+  }, [bookingId]);
 
   // ------ Dummy summary pulled from query params or placeholder ------
 
@@ -45,22 +55,6 @@ export default function UploadPaymentPage() {
   const hours = Math.max(0, Math.floor(remaining / 3_600_000));
   const minutes = Math.max(0, Math.floor((remaining % 3_600_000) / 60_000));
   const seconds = Math.max(0, Math.floor((remaining % 60_000) / 1000));
-
-  useEffect(() => {
-    const fetchBooking = async () => {
-      try {
-        const data = await getBookingById(bookingId);
-        setSummary(data);
-        // Optional: hitung countdown dari expiredAt jika ada
-      } catch (error) {
-        console.error('Gagal fetch booking:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (bookingId) fetchBooking();
-  }, [bookingId]);
 
   function formatTanggalIndonesia(dateString: string): string {
     const date = new Date(dateString);
@@ -95,26 +89,9 @@ export default function UploadPaymentPage() {
     setPreviewUrl(URL.createObjectURL(f));
   };
 
-  const handleSubmit = () => {
-    if (!file) {
-      setError('Please upload payment proof first');
-      return;
-    }
-    // TODO: send to backend
-    alert(
-      'Payment proof uploaded! Your reservation is now awaiting confirmation.',
-    );
-    router.push('/reservation/' + summary.reservationId + '/status');
-  };
-
-  const handleCancel = () => {
-    const ok = confirm(
-      'Cancel this reservation? This action cannot be undone.',
-    );
-    if (ok) router.push('/properties/' + params.get('propertyId'));
-  };
-
   if (loading) return <LoadingScreen message="Tunggu Sebentar" />;
+  if (!summary) return <p>Loading...</p>;
+
   return (
     <main className="min-h-screen bg-gray-50 py-10 px-4 md:px-0 flex justify-center">
       <div className="w-full max-w-3xl space-y-8">
@@ -147,9 +124,6 @@ export default function UploadPaymentPage() {
               <li>
                 <span className="font-medium">Check Out:</span>{' '}
                 {formatTanggalIndonesia(summary.checkOutDate || '')}
-              </li>
-              <li>
-                <span className="font-medium">Guests:</span> {summary.guests}
               </li>
             </ul>
           </div>
