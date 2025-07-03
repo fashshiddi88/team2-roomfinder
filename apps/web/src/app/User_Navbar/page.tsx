@@ -9,11 +9,16 @@ import {
   Star,
   Settings,
   LogOut,
-  ChevronRight,
   ChevronLeft,
+  ChevronRight,
   Heart,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
+import { toast } from 'sonner';
+import { getProfileUser } from '@/lib/api/axios'; // pastikan endpoint ini tersedia
+import { useAuth } from '../utils/hook/useAuth';
+import Image from 'next/image';
 
 const navItems = [
   { name: 'Dashboard', href: '/', icon: Home },
@@ -25,12 +30,45 @@ const navItems = [
 
 export default function SideNavbar() {
   const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [profileImg, setProfileImg] = useState('');
+  const { logout } = useAuth();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const profile = await getProfileUser();
+        const user = profile?.detail;
+        setName(user?.name || 'Guest');
+        setProfileImg(user?.profilePhoto || '');
+      } catch (error) {
+        toast.error('Gagal memuat data user');
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const handleLogout = () => {
+    Swal.fire({
+      title: 'Yakin ingin logout?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Ya, logout',
+      cancelButtonText: 'Batal',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        logout();
+      }
+    });
+  };
 
   return (
     <>
-      {/* Mobile Menu Toggle */}
+      {/* Mobile Toggle */}
       <button
         className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-blue-600 text-white shadow-md md:hidden"
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -70,20 +108,32 @@ export default function SideNavbar() {
 
         {/* User Info */}
         <div className={`flex items-center p-4 ${collapsed ? 'justify-center' : 'border-b border-gray-200'}`}>
-          <div className="bg-gray-200 border-2 border-dashed rounded-full w-10 h-10 flex items-center justify-center">
-            <User size={18} className="text-gray-500" />
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-dashed">
+            {profileImg ? (
+              <Image
+                src={profileImg}
+                alt="Profile"
+                width={40}
+                height={40}
+                className="object-cover w-full h-full"
+              />
+            ) : (
+              <User
+                size={18}
+                className="text-gray-500 w-full h-full flex items-center justify-center"
+              />
+            )}
           </div>
           {!collapsed && (
             <div className="ml-3">
-              <h3 className="font-medium text-gray-800">Alex Morgan</h3>
-              <p className="text-xs text-gray-500">Regular User</p>
+              <h3 className="font-bold text-lg text-gray-800">{name}</h3>
+              <p className="text-sm text-gray-500">Regular User</p>
             </div>
           )}
         </div>
 
-        {/* Nav + Logout grouped together */}
+        {/* Menu */}
         <div className="flex-1 overflow-y-auto">
-          {/* Navigation */}
           <nav className="py-4 px-2">
             {navItems.map(({ name, href, icon: Icon }) => {
               const isActive = pathname === href;
@@ -97,25 +147,23 @@ export default function SideNavbar() {
                       : 'text-gray-600 hover:bg-blue-100 hover:text-blue-700'}
                     ${collapsed ? 'justify-center' : ''}`}
                 >
-                  <Icon
-                    size={20}
-                    className={`${isActive ? 'text-white' : 'text-blue-500'}`}
-                  />
+                  <Icon size={20} className={`${isActive ? 'text-white' : 'text-blue-500'}`} />
                   {!collapsed && <span>{name}</span>}
                 </Link>
               );
             })}
           </nav>
 
-          {/* Logout - right below nav */}
+          {/* Logout */}
           <div className="px-4 pt-2">
             <button
+              onClick={handleLogout}
               className={`flex items-center gap-3 text-gray-600 hover:text-red-600 w-full ${
                 collapsed ? 'justify-center' : ''
               }`}
             >
               <LogOut size={20} className="text-gray-500" />
-              {!collapsed && <span>Sign Out</span>}
+              {!collapsed && <span>Logout</span>}
             </button>
           </div>
         </div>

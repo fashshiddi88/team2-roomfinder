@@ -30,7 +30,8 @@ export default function Navbar() {
   }, []);
   if (!isAuthLoaded) return null;
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-white shadow-sm fixed top-0 z-50 w-full">
+
       <div className="w-full px-4 md:px-8 py-4 flex justify-between items-center relative">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-3">

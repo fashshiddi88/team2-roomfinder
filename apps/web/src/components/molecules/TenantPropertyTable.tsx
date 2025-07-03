@@ -26,8 +26,6 @@ export default function TenantPropertyTable({
       text: 'Properti akan ditandai sebagai tidak tersedia.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
       confirmButtonText: 'Ya, nonaktifkan!',
       cancelButtonText: 'Batal',
     });
@@ -36,18 +34,18 @@ export default function TenantPropertyTable({
       try {
         await softDeleteProperty(id);
         setProperties((prev) =>
-          prev.map((p) => (p.id === id ? { ...p, deletedAt: new Date() } : p)),
+          prev.map((p) => (p.id === id ? { ...p, deletedAt: new Date() } : p))
         );
-        toast.success('Property berhasil ditandai tidak tersedia');
+        toast.success('Properti berhasil dinonaktifkan.');
       } catch {
-        toast.error('Gagal menghapus property');
+        toast.error('Gagal menonaktifkan properti.');
       }
     }
   };
 
   const handleUnarchive = async (id: number) => {
     const result = await Swal.fire({
-      title: 'Buka arsip properti?',
+      title: 'Aktifkan kembali properti ini?',
       text: 'Properti akan tersedia kembali.',
       icon: 'question',
       showCancelButton: true,
@@ -59,7 +57,7 @@ export default function TenantPropertyTable({
       try {
         await restoreProperty(id);
         setProperties((prev) =>
-          prev.map((p) => (p.id === id ? { ...p, deletedAt: null } : p)),
+          prev.map((p) => (p.id === id ? { ...p, deletedAt: null } : p))
         );
         toast.success('Properti berhasil diaktifkan kembali.');
       } catch {
@@ -70,12 +68,10 @@ export default function TenantPropertyTable({
 
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
-      title: 'Yakin ingin menghapus properti ini?',
-      text: 'Properti akan dihapus dari property anda.',
+      title: 'Hapus permanen properti ini?',
+      text: 'Tindakan ini tidak dapat dibatalkan.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
       confirmButtonText: 'Ya, hapus',
       cancelButtonText: 'Batal',
     });
@@ -84,93 +80,97 @@ export default function TenantPropertyTable({
       try {
         await hardDeleteProperty(id);
         setProperties((prev) => prev.filter((p) => p.id !== id));
-        toast.success('Property berhasil dihapus');
+        toast.success('Properti berhasil dihapus.');
       } catch {
-        toast.error('Gagal menghapus property');
+        toast.error('Gagal menghapus properti.');
       }
     }
   };
+
   return (
-    <table className="w-full table-auto">
-      <thead className="bg-gray-100 text-left">
+    <table className="w-full table-auto text-sm text-left text-gray-700">
+      <thead className="bg-gray-100">
         <tr>
           <th className="p-4">Image</th>
           <th className="p-4">Name</th>
           <th className="p-4">Category</th>
           <th className="p-4">Status</th>
           <th className="p-4">Room</th>
-          <th className="p-4">Action</th>
+          <th className="p-4 text-center">Action</th>
         </tr>
       </thead>
       <tbody>
-        {properties.map((property) => (
-          <tr key={property.id} className="border-b hover:bg-gray-50 h-24">
-            <td className="p-4">
-              <Image
-                src={property.image || '/urban_loft.jpg'}
-                alt={property.name}
-                width={80}
-                height={80}
-                className="rounded-lg object-cover"
-              />
-            </td>
-            <td className="p-4 font-semibold">{property.name}</td>
-            <td className="p-4">{property.category?.name || '-'}</td>
-            <td className="p-4">
-              <span
-                className={`px-2 py-1 rounded text-sm font-medium ${
-                  property.deletedAt === null
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-red-100 text-red-700'
-                }`}
-              >
-                {property.deletedAt === null ? 'Available' : 'Unavailable'}
-              </span>
-            </td>
-            <td className="p-4">
-              <Link
-                href={`/Tenant_Property/Manage_Rooms/${property.id}`}
-                className="text-blue-600 hover:underline mr-4"
-              >
-                Manage
-              </Link>
-            </td>
-            <td className="p-4 whitespace-nowrap">
-              <Link
-                href={`/Tenant_Property/${property.id}`}
-                className="text-blue-600 hover:underline mr-4"
-              >
-                Edit
-              </Link>
-              <button
-                onClick={() =>
-                  property.deletedAt
-                    ? handleUnarchive(property.id)
-                    : handleArchive(property.id)
-                }
-                className={`${
-                  property.deletedAt
-                    ? 'text-green-600 hover:underline mr-4'
-                    : 'text-yellow-600 hover:underline mr-4'
-                }`}
-              >
-                {property.deletedAt ? 'Unarchive' : 'Archive'}
-              </button>
-              <button
-                onClick={() => handleDelete(property.id)}
-                className="text-red-600 hover:underline"
-              >
-                Delete
-              </button>
-            </td>
-          </tr>
-        ))}
-        {properties.length === 0 && (
+        {properties.length === 0 ? (
           <tr>
-            <td colSpan={5} className="p-4 text-center text-gray-500">
+            <td colSpan={6} className="p-4 text-center text-gray-500">
               No properties found.
             </td>
           </tr>
+        ) : (
+          properties.map((property) => (
+            <tr key={property.id} className="border-b hover:bg-gray-50 h-24">
+              <td className="p-4">
+                <Image
+                  src={property.image || '/urban_loft.jpg'}
+                  alt={property.name}
+                  width={80}
+                  height={80}
+                  className="rounded-md object-cover"
+                />
+              </td>
+              <td className="p-4 font-medium">{property.name}</td>
+              <td className="p-4">{property.category?.name || '-'}</td>
+              <td className="p-4">
+                <span
+                  className={`px-2 py-1 rounded text-xs font-semibold ${
+                    property.deletedAt === null
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-red-100 text-red-700'
+                  }`}
+                >
+                  {property.deletedAt === null ? 'Available' : 'Unavailable'}
+                </span>
+              </td>
+              <td className="p-4">
+                <Link
+                  href={`/Tenant_Property/Manage_Rooms/${property.id}`}
+                  className="text-blue-600 hover:underline"
+                >
+                  Manage
+                </Link>
+              </td>
+              <td className="p-4 text-center">
+                <div className="flex justify-center gap-3 flex-wrap">
+                  <Link
+                    href={`/Tenant_Property/${property.id}`}
+                    className="text-blue-600 hover:underline"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    onClick={() =>
+                      property.deletedAt
+                        ? handleUnarchive(property.id)
+                        : handleArchive(property.id)
+                    }
+                    className={`${
+                      property.deletedAt
+                        ? 'text-green-600'
+                        : 'text-yellow-600'
+                    } hover:underline`}
+                  >
+                    {property.deletedAt ? 'Unarchive' : 'Archive'}
+                  </button>
+                  <button
+                    onClick={() => handleDelete(property.id)}
+                    className="text-red-600 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))
         )}
       </tbody>
     </table>

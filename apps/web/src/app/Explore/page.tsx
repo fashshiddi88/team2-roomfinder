@@ -36,7 +36,12 @@ export default function ExplorePage() {
       setLoading(true);
       try {
         const cities = await getAllCities();
-        const found = cities.find((c) => String(c.id) === String(cityId));
+        interface City {
+          id: number | string;
+          name: string;
+          // tambahkan field lain jika ada
+        }
+        const found: City | undefined = cities.find((c: City) => String(c.id) === String(cityId));
         const cityName = found?.name || '';
 
         setCityName(cityName);

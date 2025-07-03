@@ -30,7 +30,8 @@ export default function StickySearchBar({
   onCheckAvailability,
 }: Props) {
   return (
-    <div className="bg-white shadow sticky top-0 z-50 border-b">
+    <div className="bg-white shadow sticky top-[64px] z-40 border-b">
+
       <div className="max-w-screen-xl mx-auto px-4 py-3 grid grid-cols-1 lg:grid-cols-[1fr_180px_180px_200px_auto] gap-4 items-end">
         <div>
           <h2 className="text-lg font-semibold">{propertyName}</h2>

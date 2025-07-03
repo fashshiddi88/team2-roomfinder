@@ -94,8 +94,10 @@ export default function PropertyDetail() {
         setGuests={setGuests}
         onCheckAvailability={handleCheckAvailability}
       />
+      
 
-      <div className="max-w-screen-xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-screen-xl mx-auto px-4 pt-24 pb-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
         <div className="lg:col-span-2 space-y-8">
           {/* Gallery */}
           <GallerySection property={property} />
