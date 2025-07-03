@@ -119,7 +119,7 @@ export class ProfileController {
     } catch (error: any) {
       res.status(400).json({
         message: 'Failed to update password',
-        detail: error.message,
+        detail: error instanceof Error ? error.message : String(error),
       });
     }
   }

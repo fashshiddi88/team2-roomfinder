@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { BookingTypeEnum, BookingStatus } from '@/types/property';
+import { BookingTypeEnum } from '@/types/property';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -356,10 +356,26 @@ export async function uploadPaymentProof(bookingId: number, file: File) {
   return response.data;
 }
 
-export async function getTenantBookings(status?: BookingStatus) {
-  const query = status ? `?status=${status}` : '';
-  const response = await api.get(`/api/dashboard/bookings/tenant${query}`);
-  return response.data.data;
+export async function getTenantBookings({
+  status,
+  search,
+  page = 1,
+}: {
+  status?: string;
+  search?: string;
+  page?: number;
+}) {
+  const params = new URLSearchParams();
+
+  if (status) params.append('status', status);
+  if (search) params.append('search', search);
+  if (page) params.append('page', page.toString());
+
+  const response = await api.get(
+    `/api/dashboard/bookings/tenant?${params.toString()}`,
+  );
+
+  return response.data;
 }
 
 export async function acceptBookingByTenant(bookingId: number) {
@@ -374,4 +390,34 @@ export async function rejectBookingByTenant(bookingId: number) {
     `/api/dashboard/bookings/${bookingId}/reject`,
   );
   return response.data.detail;
+}
+
+export const cancelBookingByTenant = async (bookingId: number) => {
+  const response = await api.delete(
+    `/api/dashboard/${bookingId}/cancel-by-tenant`,
+  );
+  return response.data;
+};
+
+export const updateUserProfile = async (formData: FormData) => {
+  const response = await api.patch('/api/profile', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+export async function updateUserPassword({
+  oldPassword,
+  newPassword,
+}: {
+  oldPassword: string;
+  newPassword: string;
+}) {
+  const response = await api.patch('/api/profile/password', {
+    oldPassword,
+    newPassword,
+  });
+  return response.data;
 }

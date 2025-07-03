@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Swal from 'sweetalert2';
 
 export function withAuthRoles(allowedRoles: string[]) {
   return function (Component: React.ComponentType) {
@@ -13,9 +14,15 @@ export function withAuthRoles(allowedRoles: string[]) {
         const token = localStorage.getItem('token');
         const role = localStorage.getItem('role');
 
-        // Cek apakah token ada dan role termasuk yang diperbolehkan
         if (!token || !role || !allowedRoles.includes(role)) {
-          router.replace('/Login'); // Redirect ke login kalau gagal
+          Swal.fire({
+            icon: 'warning',
+            title: 'Akses Ditolak',
+            text: 'Anda tidak memiliki akses ke halaman ini',
+            confirmButtonText: 'Kembali',
+          }).then(() => {
+            router.replace('/');
+          });
         } else {
           setChecked(true);
         }

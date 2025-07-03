@@ -1,14 +1,12 @@
+'use client';
+import { useParams } from 'next/navigation';
+import { withAuthRoles } from '@/middleware/withAuthRoles';
 import EditRoomForm from '../EditRoomForm';
 
-export default function EditRoomPage({
-  params,
-}: {
-  params: { propertyId: string; roomId: string };
-}) {
-  return (
-    <EditRoomForm
-      propertyId={Number(params.propertyId)}
-      roomId={Number(params.roomId)}
-    />
-  );
+function EditRoomPage() {
+  const params = useParams();
+  const propertyId = Number(params.propertyId);
+  const roomId = Number(params.roomId);
+  return <EditRoomForm propertyId={propertyId} roomId={roomId} />;
 }
+export default withAuthRoles(['TENANT'])(EditRoomPage);

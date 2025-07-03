@@ -6,9 +6,13 @@ export class DashboardService {
   async getTenantBookings({
     userId,
     status,
+    search,
+    page = 1,
   }: {
     userId: number;
     status?: BookingStatus;
+    search?: string;
+    page?: number;
   }) {
     const tenant = await prisma.tenant.findUnique({
       where: { userId },
@@ -23,10 +27,35 @@ export class DashboardService {
 
     const propertyIds = properties.map((p) => p.id);
 
+    const limit = 5;
+    const offset = (page - 1) * limit;
+
     const bookings = await prisma.booking.findMany({
       where: {
         propertyId: { in: propertyIds },
         ...(status ? { status } : {}),
+        ...(search
+          ? {
+              OR: [
+                {
+                  user: {
+                    name: {
+                      contains: search,
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+                {
+                  property: {
+                    name: {
+                      contains: search,
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              ],
+            }
+          : {}),
       },
       include: {
         user: true,
@@ -38,9 +67,32 @@ export class DashboardService {
       orderBy: {
         createdAt: 'desc',
       },
+      skip: offset,
+      take: limit,
     });
 
-    return bookings;
+    const total = await prisma.booking.count({
+      where: {
+        propertyId: { in: propertyIds },
+        ...(status ? { status } : {}),
+        ...(search
+          ? {
+              OR: [
+                { user: { name: { contains: search, mode: 'insensitive' } } },
+                {
+                  property: { name: { contains: search, mode: 'insensitive' } },
+                },
+              ],
+            }
+          : {}),
+      },
+    });
+
+    return {
+      data: bookings,
+      totalPages: Math.ceil(total / limit),
+      totalData: total,
+    };
   }
 
   public async acceptBooking(bookingId: number, userId: number) {

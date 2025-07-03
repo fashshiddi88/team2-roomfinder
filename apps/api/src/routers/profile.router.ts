@@ -35,7 +35,6 @@ export class ProfileRouter {
     this.router.patch(
       '/profile',
       AuthenticationMiddleware.verifyToken,
-      AuthorizationMiddleware.allowRoles('USER'),
       uploadProfileImage.single('image'),
       ValidationMiddleware.validate(updateProfileSchema),
       this.profileController.updateProfile.bind(this.profileController),

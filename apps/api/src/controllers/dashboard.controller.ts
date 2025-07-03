@@ -22,11 +22,16 @@ export class DashboardController {
     try {
       const userId = (req as any).user?.userId;
       const statusParam = req.query.status as string | undefined;
+      const search = req.query.search as string | undefined;
+      const pageParam = req.query.page as string | undefined;
+
       const status =
         statusParam &&
         Object.values(BookingStatus).includes(statusParam as BookingStatus)
           ? (statusParam as BookingStatus)
           : undefined;
+
+      const page = pageParam ? parseInt(pageParam, 10) : 1;
 
       if (!userId) {
         return res
@@ -34,14 +39,19 @@ export class DashboardController {
           .json({ message: 'Unauthorized: Tenant not found' });
       }
 
-      const bookings = await this.dashboardService.getTenantBookings({
+      const result = await this.dashboardService.getTenantBookings({
         userId,
         status,
+        search,
+        page,
       });
 
       return res.status(200).json({
         message: 'Tenant bookings retrieved successfully',
-        data: bookings,
+        data: result.data,
+        totalPages: result.totalPages,
+        totalData: result.totalData,
+        currentPage: page,
       });
     } catch (error: any) {
       console.error('Error fetching tenant bookings:', error);
