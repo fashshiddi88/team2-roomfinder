@@ -20,5 +20,9 @@ export class CatalogRouter {
       '/cities',
       this.catalogController.getAllCities.bind(this.catalogController),
     );
+    this.router.get(
+      '/properties',
+      this.catalogController.getAllProperties.bind(this.catalogController),
+    );
   }
 }

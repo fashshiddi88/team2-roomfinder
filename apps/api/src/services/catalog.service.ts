@@ -174,4 +174,35 @@ export class CatalogService {
 
     return cities;
   }
+
+  public async getAllProperties(page = 1, limit = 9) {
+    const skip = (page - 1) * limit;
+
+    const [properties, total] = await Promise.all([
+      prisma.property.findMany({
+        where: { deletedAt: null },
+        include: {
+          rooms: true,
+          city: true,
+          reviews: true,
+        },
+        orderBy: { name: 'asc' },
+        skip,
+        take: limit,
+      }),
+      prisma.property.count({
+        where: { deletedAt: null },
+      }),
+    ]);
+
+    return {
+      data: properties,
+      meta: {
+        totalItems: total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+        limit,
+      },
+    };
+  }
 }

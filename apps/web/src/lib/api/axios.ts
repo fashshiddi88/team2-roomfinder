@@ -317,3 +317,10 @@ export async function rejectBookingByTenant(bookingId: number) {
   );
   return response.data.detail;
 }
+
+export async function getAllProperties(page = 1, limit = 9) {
+  const res = await api.get('/api/properties', {
+    params: { page, limit },
+  });
+  return res.data;
+}

@@ -78,4 +78,25 @@ export class CatalogController {
         .json({ message: 'Failed to fetch cities', error: err.message });
     }
   }
+
+  public async getAllProperties(req: Request, res: Response) {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 9;
+
+      const result = await this.catalogService.getAllProperties(page, limit);
+
+      return res.status(200).json({
+        message: 'Properties fetched successfully',
+        data: result.data,
+        meta: result.meta,
+      });
+    } catch (error: any) {
+      console.error('Error fetching properties:', error);
+      return res.status(500).json({
+        message: 'Failed to fetch properties',
+        detail: error.message,
+      });
+    }
+  }
 }
