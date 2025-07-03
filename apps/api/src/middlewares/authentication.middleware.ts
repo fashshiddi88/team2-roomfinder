@@ -14,6 +14,11 @@ export class AuthenticationMiddleware {
 
       const token = authHeader.split(' ')[1];
       const decoded = JwtUtils.verifyToken(token) as any;
+      if (!decoded || !decoded.userId) {
+        return res
+          .status(401)
+          .json({ message: 'Unauthorized: token payload invalid' });
+      }
 
       (req as any).user = decoded;
       next();

@@ -117,7 +117,7 @@ function TenantEditPropertyPage() {
 
       <main className="flex-1 px-8 py-10">
         <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow">
-          <h2 className="text-2xl font-bold mb-6">Buat Properti Baru</h2>
+          <h2 className="text-2xl font-bold mb-6">Edit Property</h2>
 
           <form
             onSubmit={handleSubmit}

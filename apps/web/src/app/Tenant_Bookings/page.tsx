@@ -97,15 +97,17 @@ function TenantBookingsPage() {
             >
               <div className="flex flex-col gap-1">
                 <h2 className="text-lg font-bold text-gray-800">
-                  {booking.property}
+                  {booking.property.name}
                 </h2>
                 <p className="text-sm text-gray-500">{booking.user.email}</p>
+                <p className="text-sm text-gray-500">{booking.orderNumber}</p>
                 <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
                   <span className="flex items-center gap-1">
                     <User size={14} /> {booking.user.name}
                   </span>
                   <span className="flex items-center gap-1">
-                    <Calendar size={14} /> {booking.date}
+                    <Calendar size={14} />{' '}
+                    {new Date(booking.createdAt).toLocaleDateString('id-ID')}
                   </span>
                   <span
                     className={`text-xs font-medium px-2 py-0.5 rounded-full ${

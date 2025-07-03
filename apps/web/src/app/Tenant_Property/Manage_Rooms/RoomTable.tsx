@@ -2,11 +2,7 @@
 
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
-import {
-  hardDeleteProperty,
-  restoreProperty,
-  softDeleteProperty,
-} from '@/lib/api/axios';
+import { hardDeleteRoom, restoreRoom, softDeleteRoom } from '@/lib/api/axios';
 import Swal from 'sweetalert2';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -22,7 +18,7 @@ export default function TenantRoomTable({ rooms, setRooms }: Props) {
   const handleArchive = async (id: number) => {
     const result = await Swal.fire({
       title: 'Yakin ingin menonaktifkan room ini?',
-      text: 'Properti akan ditandai sebagai tidak tersedia.',
+      text: 'Room akan ditandai sebagai tidak tersedia.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -33,13 +29,13 @@ export default function TenantRoomTable({ rooms, setRooms }: Props) {
 
     if (result.isConfirmed) {
       try {
-        await softDeleteProperty(id);
+        await softDeleteRoom(Number(propertyId), id);
         setRooms((prev) =>
           prev.map((p) => (p.id === id ? { ...p, deletedAt: new Date() } : p)),
         );
         toast.success('Room berhasil ditandai tidak tersedia');
       } catch {
-        toast.error('Gagal menghapus property');
+        toast.error('Gagal menonaktifkan room');
       }
     }
   };
@@ -56,7 +52,7 @@ export default function TenantRoomTable({ rooms, setRooms }: Props) {
 
     if (result.isConfirmed) {
       try {
-        await restoreProperty(id);
+        await restoreRoom(Number(propertyId), id);
         setRooms((prev) =>
           prev.map((p) => (p.id === id ? { ...p, deletedAt: null } : p)),
         );
@@ -81,7 +77,7 @@ export default function TenantRoomTable({ rooms, setRooms }: Props) {
 
     if (result.isConfirmed) {
       try {
-        await hardDeleteProperty(id);
+        await hardDeleteRoom(Number(propertyId), id);
         setRooms((prev) => prev.filter((p) => p.id !== id));
         toast.success('room berhasil dihapus');
       } catch {
@@ -96,6 +92,7 @@ export default function TenantRoomTable({ rooms, setRooms }: Props) {
           <th className="p-4">Image</th>
           <th className="p-4">Name</th>
           <th className="p-4">Peak Season</th>
+          <th className="p-4">Status</th>
           <th className="p-4">Action</th>
         </tr>
       </thead>
@@ -120,9 +117,20 @@ export default function TenantRoomTable({ rooms, setRooms }: Props) {
                 Manage
               </Link>
             </td>
+            <td className="p-4">
+              <span
+                className={`px-2 py-1 rounded text-xs font-semibold ${
+                  room.deletedAt === null
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-red-100 text-red-700'
+                }`}
+              >
+                {room.deletedAt === null ? 'Available' : 'Unavailable'}
+              </span>
+            </td>
             <td className="p-4 whitespace-nowrap">
               <Link
-                href={`/Tenant_Property/${room.id}`}
+                href={`/Tenant_Property/Manage_Rooms/${propertyId}/Room/${room.id}/Edit`}
                 className="text-blue-600 hover:underline mr-4"
               >
                 Edit

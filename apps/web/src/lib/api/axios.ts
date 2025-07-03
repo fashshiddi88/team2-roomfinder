@@ -175,6 +175,64 @@ export async function createRoom(propertyId: number, formData: FormData) {
   return response.data;
 }
 
+export async function updateRoom(
+  propertyId: number,
+  roomId: number,
+  form: {
+    name?: string;
+    description?: string;
+    qty?: number;
+    basePrice?: number;
+    capacity?: number;
+  },
+  image?: File | null,
+) {
+  const data = new FormData();
+
+  Object.entries(form).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      data.append(key, String(value));
+    }
+  });
+
+  if (image) {
+    data.append('image', image);
+  }
+
+  const response = await api.put(
+    `/api/property/${propertyId}/room/${roomId}`,
+    data,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  );
+
+  return response.data;
+}
+
+export async function softDeleteRoom(propertyId: number, roomId: number) {
+  const response = await api.delete(
+    `/api/property/${propertyId}/room/${roomId}`,
+  );
+  return response.data;
+}
+
+export async function restoreRoom(propertyId: number, roomId: number) {
+  const response = await api.patch(
+    `/api/property/${propertyId}/room/restore/${roomId}`,
+  );
+  return response.data;
+}
+
+export async function hardDeleteRoom(propertyId: number, roomId: number) {
+  const response = await api.delete(
+    `/api/property/${propertyId}/room/${roomId}`,
+  );
+  return response.data;
+}
+
 export async function getPeakSeasonsByRoomId(
   roomId: number,
   page = 1,

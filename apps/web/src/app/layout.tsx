@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'roomfinder - Find Your Perfect Stay',
+  title: 'Room Finder - Find Your Perfect Stay',
   description: 'Browse and book the best properties for your next adventure',
 };
 

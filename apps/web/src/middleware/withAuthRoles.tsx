@@ -15,7 +15,7 @@ export function withAuthRoles(allowedRoles: string[]) {
 
         // Cek apakah token ada dan role termasuk yang diperbolehkan
         if (!token || !role || !allowedRoles.includes(role)) {
-          router.replace('/login'); // Redirect ke login kalau gagal
+          router.replace('/Login'); // Redirect ke login kalau gagal
         } else {
           setChecked(true);
         }

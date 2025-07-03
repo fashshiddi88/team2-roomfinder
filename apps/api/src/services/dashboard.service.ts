@@ -31,6 +31,9 @@ export class DashboardService {
       include: {
         user: true,
         room: true,
+        property: {
+          select: { name: true },
+        },
       },
       orderBy: {
         createdAt: 'desc',
