@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { withAuthRoles } from '@/middleware/withAuthRoles';
 import SideNavbar from '@/app/User_Navbar/page';
 import api from '@/lib/api/axios';
 
@@ -22,7 +23,7 @@ interface Booking {
   };
 }
 
-export default function BookingsPage() {
+function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
 
   useEffect(() => {
@@ -69,8 +70,8 @@ export default function BookingsPage() {
                     b.status === 'CONFIRMED'
                       ? 'text-green-600'
                       : b.status === 'WAITING_CONFIRMATION'
-                      ? 'text-yellow-600'
-                      : 'text-red-600'
+                        ? 'text-yellow-600'
+                        : 'text-red-600'
                   }`}
                 >
                   Status: {b.status}
@@ -83,3 +84,4 @@ export default function BookingsPage() {
     </div>
   );
 }
+export default withAuthRoles(['USER'])(BookingsPage);

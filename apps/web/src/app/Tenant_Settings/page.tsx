@@ -6,11 +6,12 @@ import {
   updateUserProfile,
   updateUserPassword,
 } from '@/lib/api/axios';
+import { withAuthRoles } from '@/middleware/withAuthRoles';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { toast } from 'sonner';
 import TenantSidebar from '../Tenant_Navbar/page';
 
-export default function TenantSettingsPage() {
+function TenantSettingsPage() {
   const [showPassword1, setShowPassword1] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
   const [showPassword3, setShowPassword3] = useState(false);
@@ -223,3 +224,4 @@ export default function TenantSettingsPage() {
     </div>
   );
 }
+export default withAuthRoles(['TENANT'])(TenantSettingsPage);

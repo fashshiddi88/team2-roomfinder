@@ -1,148 +1,298 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import {
+  getProfileUser,
+  updateUserProfile,
+  updateUserPassword,
+} from '@/lib/api/axios';
+import { withAuthRoles } from '@/middleware/withAuthRoles';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { toast } from 'sonner';
+import { User } from 'lucide-react';
+import Image from 'next/image';
 import SideNavbar from '@/app/User_Navbar/page';
-import { getProfileUser, updateUserProfile } from '@/lib/api/axios';
 
+function UserSettingsPage() {
+  const [showPassword1, setShowPassword1] = useState(false);
+  const [showPassword2, setShowPassword2] = useState(false);
+  const [showPassword3, setShowPassword3] = useState(false);
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+  });
+  const [passwordForm, setPasswordForm] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmNewPassword: '',
+  });
 
-export default function SettingsPage() {
-    const [user, setUser] = useState({
-        name: '',
-        email: '',
-        phone: '',
-    });
+  const [profileImg, setProfileImg] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
 
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
 
-    // Fetch profile and update state
-    const refreshProfile = async () => {
-        setLoading(true);
-        try {
-            const res = await getProfileUser();
-            setUser({
-                name: res.detail.name || '',
-                email: res.detail.email || '',
-                phone: res.detail.phone || '',
-            });
-        } catch (err) {
-            console.error('Failed to refresh profile:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordForm((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
 
-    useEffect(() => {
-        refreshProfile();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    const handleSave = async () => {
-        try {
-            setSaving(true);
-            const formData = new FormData();
-            formData.append('name', user.name);
-            formData.append('email', user.email);
-            formData.append('phone', user.phone);
-            await updateUserProfile(formData);
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+    const maxSize = 1 * 1024 * 1024; // 1MB
 
-            await refreshProfile();
-            alert('Profile updated successfully!');
-        } catch (err) {
-            console.error('Failed to update profile:', err);
-            alert('Failed to update profile');
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    if (loading) {
-        return <div className="p-6">Loading profile...</div>;
+    if (!allowedTypes.includes(file.type)) {
+      return toast.error(
+        'Hanya file JPG, JPEG, PNG, atau GIF yang diperbolehkan',
+      );
     }
 
-    return (
-        <div className="p-6 md:p-10 max-w-3xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-800 mb-8">Settings</h1>
+    if (file.size > maxSize) {
+      return toast.error('Ukuran file maksimum adalah 1MB');
+    }
 
-            {/* Profile Info */}
-            <section className="mb-10">
-                <h2 className="text-xl font-semibold mb-4 text-blue-600">Profile Information</h2>
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Full Name</label>
-                        <input
-                            type="text"
-                            value={user.name}
-                            onChange={(e) => setUser({ ...user, name: e.target.value })}
-                            className="w-full border rounded p-2"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Email</label>
-                        <input
-                            type="email"
-                            value={user.email}
-                            onChange={(e) => setUser({ ...user, email: e.target.value })}
-                            className="w-full border rounded p-2"
-                        />
-                    </div>
-                    {/* <div>
-                        <label className="block text-sm font-medium mb-1">Phone Number</label>
-                        <input
-                            type="tel"
-                            value={user.phone}
-                            onChange={(e) => setUser({ ...user, phone: e.target.value })}
-                            className="w-full border rounded p-2"
-                        />
-                    </div> */}
-                    <button
-                        onClick={handleSave}
-                        className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-                        disabled={saving}
-                    >
-                        {saving ? 'Saving...' : 'Save Changes'}
-                    </button>
+    const reader = new FileReader();
+    reader.onload = () => setProfileImg(reader.result as string);
+    reader.readAsDataURL(file);
+    setPhotoFile(file);
+  };
+
+  const fetchProfile = async () => {
+    try {
+      const res = await getProfileUser();
+      const user = res.detail;
+      setForm({
+        name: user.name || '',
+        email: user.email,
+        phone: user.phone || '',
+      });
+      setProfileImg(user.profilePhoto || null);
+    } catch (error) {
+      console.error('Gagal fetch profile:', error);
+    }
+  };
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const formData = new FormData();
+      formData.append('name', form.name);
+      formData.append('email', form.email);
+      formData.append('phone', form.phone);
+      if (photoFile) {
+        formData.append('image', photoFile);
+      }
+
+      await updateUserProfile(formData);
+
+      toast.success('Berhasil memperbarui profil');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.response?.data?.message || 'Gagal memperbarui profil');
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const { oldPassword, newPassword, confirmNewPassword } = passwordForm;
+
+    if (!oldPassword || !newPassword || !confirmNewPassword) {
+      toast.warning('Semua kolom harus diisi.');
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      toast.error('Konfirmasi password tidak cocok.');
+      return;
+    }
+
+    try {
+      await updateUserPassword({ oldPassword, newPassword });
+      toast.success('Password berhasil diperbarui.');
+      setPasswordForm({
+        oldPassword: '',
+        newPassword: '',
+        confirmNewPassword: '',
+      });
+    } catch (error: any) {
+      console.error('Update password error:', error?.response?.data);
+      toast.error(error.response.data.detail || 'Terjadi kesalahan.');
+    }
+  };
+
+  return (
+    <div className="flex">
+      {/* Sidebar */}
+      <SideNavbar />
+
+      {/* Main content */}
+      <main className="ml-64 p-6 w-full">
+        <h1 className="text-2xl font-semibold mb-4">Account Settings</h1>
+        <form onSubmit={handleUpdate} className="space-y-4 max-w-md">
+          <div className="flex justify-center mb-4">
+            <div
+              className="w-24 h-24 rounded-full border overflow-hidden cursor-pointer relative group"
+              onClick={() => document.getElementById('photoInput')?.click()}
+            >
+              {profileImg ? (
+                <Image
+                  src={profileImg}
+                  alt="Foto Profil"
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <div className="flex items-center justify-center w-full h-full text-gray-400">
+                  <User size={40} />
                 </div>
-            </section>
+              )}
+              <input
+                type="file"
+                id="photoInput"
+                accept="image/*"
+                className="hidden"
+                onChange={handlePhotoChange}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block font-medium">Nama</label>
+            <input
+              type="text"
+              name="name"
+              className="w-full border rounded p-2 mt-1"
+              value={form.name}
+              onChange={handleChange}
+            />
+          </div>
+          <div>
+            <label className="block font-medium">Email</label>
+            <input
+              type="email"
+              name="email"
+              className="w-full border rounded p-2 mt-1"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="you@example.com"
+            />
+          </div>
+          <div>
+            <label className="block font-medium">Telepon</label>
+            <input
+              type="text"
+              name="phone"
+              className="w-full border rounded p-2 mt-1"
+              value={form.phone}
+              onChange={handleChange}
+            />
+          </div>
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Simpan
+          </button>
+        </form>
 
-            {/* Password */}
-            <section className="mb-10">
-                <h2 className="text-xl font-semibold mb-4 text-blue-600">Change Password</h2>
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Current Password</label>
-                        <input type="password" className="w-full border rounded p-2" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">New Password</label>
-                        <input type="password" className="w-full border rounded p-2" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Confirm New Password</label>
-                        <input type="password" className="w-full border rounded p-2" />
-                    </div>
-                    <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                        Update Password
-                    </button>
-                </div>
-            </section>
-
-            {/* Notifications */}
-            <section className="mb-10">
-                <h2 className="text-xl font-semibold mb-4 text-blue-600">Notifications</h2>
-                <label className="flex items-center space-x-3">
-                    <input type="checkbox" className="w-5 h-5" />
-                    <span className="text-gray-700">Receive booking updates via email</span>
-                </label>
-            </section>
-
-            {/* Delete Account */}
-            <section className="mt-10 border-t pt-6">
-                <h2 className="text-xl font-semibold mb-4 text-red-600">Danger Zone</h2>
-                <button className="text-red-600 border border-red-600 px-4 py-2 rounded hover:bg-red-50 transition">
-                    Delete Account
-                </button>
-            </section>
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">
+            Ubah Kata Sandi
+          </h3>
+          <div className="border-b border-gray-300 mb-4" />
         </div>
-    );
+
+        <form onSubmit={handleUpdatePassword} className="space-y-4 max-w-md">
+          <div>
+            <label>Password Lama</label>
+            <div className="relative">
+              <input
+                type={showPassword1 ? 'text' : 'password'}
+                name="oldPassword"
+                className="w-full border rounded p-2 mt-1"
+                value={passwordForm.oldPassword}
+                onChange={handlePasswordChange}
+              />
+              <span
+                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 cursor-pointer"
+                onClick={() => setShowPassword1(!showPassword1)}
+              >
+                {showPassword1 ? (
+                  <FaEye className="h-5 w-5" />
+                ) : (
+                  <FaEyeSlash className="h-5 w-5" />
+                )}
+              </span>
+            </div>
+          </div>
+          <div>
+            <label>Password Baru</label>
+            <div className="relative">
+              <input
+                type={showPassword2 ? 'text' : 'password'}
+                name="newPassword"
+                className="w-full border rounded p-2 mt-1"
+                value={passwordForm.newPassword}
+                onChange={handlePasswordChange}
+              />
+              <span
+                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 cursor-pointer"
+                onClick={() => setShowPassword2(!showPassword2)}
+              >
+                {showPassword2 ? (
+                  <FaEye className="h-5 w-5" />
+                ) : (
+                  <FaEyeSlash className="h-5 w-5" />
+                )}
+              </span>
+            </div>
+          </div>
+          <div>
+            <label>Konfirmasi Password Baru</label>
+            <div className="relative">
+              <input
+                type={showPassword3 ? 'text' : 'password'}
+                name="confirmNewPassword"
+                className="w-full border rounded p-2 mt-1"
+                value={passwordForm.confirmNewPassword}
+                onChange={handlePasswordChange}
+              />
+              <span
+                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 cursor-pointer"
+                onClick={() => setShowPassword3(!showPassword3)}
+              >
+                {showPassword3 ? (
+                  <FaEye className="h-5 w-5" />
+                ) : (
+                  <FaEyeSlash className="h-5 w-5" />
+                )}
+              </span>
+            </div>
+          </div>
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Ganti Password
+          </button>
+        </form>
+      </main>
+    </div>
+  );
 }
+export default withAuthRoles(['USER'])(UserSettingsPage);

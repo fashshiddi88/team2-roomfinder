@@ -16,6 +16,7 @@ import {
 import { useState } from 'react';
 import Swal from 'sweetalert2';
 import { useAuth } from '../utils/hook/useAuth';
+import { withAuthRoles } from '@/middleware/withAuthRoles';
 import Image from 'next/image';
 import { useProfile } from '@/app/context/ProfileContext';
 
@@ -27,7 +28,7 @@ const navItems = [
   { name: 'Settings', href: '/Settings_User', icon: Settings },
 ];
 
-export default function SideNavbar() {
+function SideNavbar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -35,7 +36,7 @@ export default function SideNavbar() {
   const profileContext = useProfile(); // ✅ gunakan di dalam komponen
 
   const name = profileContext?.user?.name ?? 'Guest';
-  const profileImg = profileContext?.user?.profilePhoto ?? '';
+  const profilePhoto = profileContext?.user?.profilePhoto ?? '';
 
   const handleLogout = () => {
     Swal.fire({
@@ -100,9 +101,9 @@ export default function SideNavbar() {
           }`}
         >
           <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-dashed">
-            {profileImg ? (
+            {profilePhoto ? (
               <Image
-                src={profileImg}
+                src={profilePhoto}
                 alt="Profile"
                 width={40}
                 height={40}
@@ -140,7 +141,10 @@ export default function SideNavbar() {
                     }
                     ${collapsed ? 'justify-center' : ''}`}
                 >
-                  <Icon size={20} className={`${isActive ? 'text-white' : 'text-blue-500'}`} />
+                  <Icon
+                    size={20}
+                    className={`${isActive ? 'text-white' : 'text-blue-500'}`}
+                  />
                   {!collapsed && <span>{name}</span>}
                 </Link>
               );
@@ -172,3 +176,4 @@ export default function SideNavbar() {
     </>
   );
 }
+export default withAuthRoles(['USER'])(SideNavbar);

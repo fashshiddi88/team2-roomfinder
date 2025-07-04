@@ -31,7 +31,6 @@ export default function Navbar() {
   if (!isAuthLoaded) return null;
   return (
     <header className="bg-white shadow-sm fixed top-0 z-50 w-full">
-
       <div className="w-full px-4 md:px-8 py-4 flex justify-between items-center relative">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-3">
@@ -83,7 +82,7 @@ export default function Navbar() {
               {showProfileMenu && (
                 <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg z-50">
                   <Link
-                    href="/profile"
+                    href="/Settings_User"
                     className="block px-4 py-2 text-sm hover:bg-gray-100"
                     onClick={() => setShowProfileMenu(false)}
                   >

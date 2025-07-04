@@ -3,6 +3,7 @@
 import SideNavbar from '@/app/User_Navbar/page';
 import { Heart } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { withAuthRoles } from '@/middleware/withAuthRoles';
 import api from '@/lib/api/axios';
 
 type Property = {
@@ -15,7 +16,7 @@ type Property = {
   mainImage?: string;
 };
 
-export default function WishlistPage() {
+function WishlistPage() {
   const [wishlist, setWishlist] = useState<Property[]>([]);
 
   const fetchWishlist = async () => {
@@ -53,7 +54,10 @@ export default function WishlistPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {wishlist.map((item) => (
-              <div key={item.id} className="bg-white rounded-xl shadow p-4 relative">
+              <div
+                key={item.id}
+                className="bg-white rounded-xl shadow p-4 relative"
+              >
                 <img
                   src={item.mainImage ?? '/default.jpg'}
                   alt={item.name}
@@ -86,3 +90,4 @@ export default function WishlistPage() {
     </div>
   );
 }
+export default withAuthRoles(['USER'])(WishlistPage);
