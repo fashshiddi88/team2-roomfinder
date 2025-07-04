@@ -47,16 +47,15 @@ export default function HomePage() {
         );
 
         const allProperties = responses.flatMap((res, index) =>
-          (res?.data || []).map((prop: any) => {
-            return {
-              id: prop.id,
-              name: prop.name,
-              image: prop.image || '/default-room.jpg',
-              location: prop.cityName || cities[index]?.name || 'Indonesia',
-              price: prop.minPrice ?? prop.rooms?.[0]?.price ?? prop.price ?? 0,
-              rating: prop.rating || 4.5,
-            };
-          })
+          (res?.data || []).map((prop: any) => ({
+            id: prop.id,
+            name: prop.name,
+            image: prop.image || '/default-room.jpg',
+            location: prop.cityName || cities[index]?.name || 'Indonesia',
+            price: prop.minPrice ?? prop.rooms?.[0]?.price ?? prop.price ?? 0,
+            rating: prop.rating || 4.5,
+            isWishlisted: prop.isWishlisted ?? false,
+          }))
         );
 
         const uniqueProperties = Array.from(
@@ -75,7 +74,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
 
       {/* Hero Carousel */}
@@ -89,30 +88,43 @@ export default function HomePage() {
           className="rounded-none"
         >
           <div>
-            <img src="/sakura.jpg" alt="Slide 1" className="w-full h-[500px] object-cover" />
+            <img
+              src="/sakura.jpg"
+              alt="Slide 1"
+              className="w-full h-[440px] md:h-[480px] object-cover"
+            />
           </div>
           <div>
-            <img src="/diskon_hotel.jpeg" alt="Slide 2" className="w-full h-[500px] object-cover" />
+            <img
+              src="/diskon_hotel.jpeg"
+              alt="Slide 2"
+              className="w-full h-[440px] md:h-[480px] object-cover"
+            />
           </div>
           <div>
-            <img src="/city_hotel.jpg" alt="Slide 3" className="w-full h-[500px] object-cover" />
+            <img
+              src="/city_hotel.jpg"
+              alt="Slide 3"
+              className="w-full h-[440px] md:h-[480px] object-cover"
+            />
           </div>
         </Carousel>
       </section>
 
+      {/* Main Content */}
+      <main className="space-y-12 pt-10 pb-16 px-4 md:px-16 w-full">
+        {/* Search */}
+        {/* Search Form */}
+        <section className="py-12 bg-white px-4 md:px-16">
+          <div className="max-w-screen-xl mx-auto">
+            <h1 className="text-3xl font-bold mb-6">Find a Stay</h1>
+            <SearchForm />
+          </div>
+        </section>
 
-      {/* Search Form */}
-      <section className="py-12 px-4 md:px-16 w-full bg-white">
-        <div className="max-w-screen-xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">Find a Stay</h1>
-          <SearchForm />
-        </div>
-      </section>
 
-
-      {/* Recommended Properties */}
-      <section className="w-full bg-white pb-20 px-4 md:px-16">
-        <div className="max-w-screen-xl mx-auto">
+        {/* Recommended */}
+        <section className="max-w-screen-xl mx-auto">
           <h2 className="text-2xl font-semibold mb-6">Recommended Stays</h2>
 
           {loading ? (
@@ -129,9 +141,8 @@ export default function HomePage() {
               ))}
             </div>
           )}
-        </div>
-      </section>
-
+        </section>
+      </main>
 
       <Footer />
     </div>

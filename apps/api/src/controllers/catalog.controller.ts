@@ -7,6 +7,7 @@ export class CatalogController {
   constructor() {
     this.catalogService = new CatalogService();
   }
+
   async getCatalogProperties(req: Request, res: Response) {
     try {
       const {
@@ -19,12 +20,13 @@ export class CatalogController {
         capacity: cap,
         startDate: start,
         endDate: end,
+        userId: userIdStr, // 👈 Tambahkan ini
       } = req.query;
 
       const numericPage = Number(page);
       const numericPageSize = Number(pageSize);
-
       const capacity = cap ? Number(cap) : undefined;
+      const userId = userIdStr ? Number(userIdStr) : undefined; // 👈 Parse userId
       const startDate = start ? new Date(start as string) : undefined;
       const endDate = end ? new Date(end as string) : undefined;
 
@@ -48,10 +50,10 @@ export class CatalogController {
         page: numericPage,
         pageSize: numericPageSize,
         capacity,
-
         startDate,
         endDate,
         days,
+        userId, // 👈 Dikirim ke service
       });
 
       return res.status(200).json({
@@ -69,13 +71,15 @@ export class CatalogController {
   public async getAllCities(req: Request, res: Response) {
     try {
       const cities = await this.catalogService.getAllCities();
-      res
-        .status(200)
-        .json({ message: 'Cities fetched successfully', data: cities });
+      res.status(200).json({
+        message: 'Cities fetched successfully',
+        data: cities,
+      });
     } catch (err: any) {
-      res
-        .status(500)
-        .json({ message: 'Failed to fetch cities', error: err.message });
+      res.status(500).json({
+        message: 'Failed to fetch cities',
+        error: err.message,
+      });
     }
   }
 }

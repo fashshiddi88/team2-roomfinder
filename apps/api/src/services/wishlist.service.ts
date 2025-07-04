@@ -9,7 +9,6 @@ export class WishlistService {
     });
 
     if (existing) {
-      // Jika sudah ada, berarti user ingin menghapus dari wishlist
       await prisma.wishlist.delete({
         where: {
           userId_propertyId: { userId, propertyId },
@@ -17,7 +16,6 @@ export class WishlistService {
       });
       return { message: 'Property removed from wishlist', isWishlisted: false };
     } else {
-      // Jika belum ada, berarti user ingin menambahkan ke wishlist
       await prisma.wishlist.create({
         data: { userId, propertyId },
       });
@@ -31,11 +29,30 @@ export class WishlistService {
       include: {
         property: {
           include: {
-            city: true, // opsional, jika ingin detail lokasi
+            city: true,
+            PropertyImages: {
+              take: 1, // Ambil hanya 1 gambar utama
+            },
+            rooms: {
+              take: 1, // Ambil 1 kamar untuk ambil harga
+              select: {
+                basePrice: true,
+              },
+            },
           },
         },
       },
     });
-    return wishlisted.map((w) => w.property);
+
+    return wishlisted.map((w) => {
+      const property = w.property;
+      return {
+        id: property.id,
+        name: property.name,
+        city: property.city,
+        price: property.rooms?.[0]?.basePrice ?? 0,
+        mainImage: property.PropertyImages?.[0]?.url ?? '/default.jpg',
+      };
+    });
   }
 }

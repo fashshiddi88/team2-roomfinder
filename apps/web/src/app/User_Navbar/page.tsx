@@ -13,12 +13,11 @@ import {
   ChevronRight,
   Heart,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Swal from 'sweetalert2';
-import { toast } from 'sonner';
-import { getProfileUser } from '@/lib/api/axios'; // pastikan endpoint ini tersedia
 import { useAuth } from '../utils/hook/useAuth';
 import Image from 'next/image';
+import { useProfile } from '@/app/context/ProfileContext';
 
 const navItems = [
   { name: 'Dashboard', href: '/', icon: Home },
@@ -32,23 +31,11 @@ export default function SideNavbar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [profileImg, setProfileImg] = useState('');
   const { logout } = useAuth();
+  const profileContext = useProfile(); // ✅ gunakan di dalam komponen
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const profile = await getProfileUser();
-        const user = profile?.detail;
-        setName(user?.name || 'Guest');
-        setProfileImg(user?.profilePhoto || '');
-      } catch (error) {
-        toast.error('Gagal memuat data user');
-      }
-    };
-    fetchUser();
-  }, []);
+  const name = profileContext?.user?.name ?? 'Guest';
+  const profileImg = profileContext?.user?.profilePhoto ?? '';
 
   const handleLogout = () => {
     Swal.fire({
@@ -107,7 +94,11 @@ export default function SideNavbar() {
         </div>
 
         {/* User Info */}
-        <div className={`flex items-center p-4 ${collapsed ? 'justify-center' : 'border-b border-gray-200'}`}>
+        <div
+          className={`flex items-center p-4 ${
+            collapsed ? 'justify-center' : 'border-b border-gray-200'
+          }`}
+        >
           <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-dashed">
             {profileImg ? (
               <Image
@@ -142,9 +133,11 @@ export default function SideNavbar() {
                   key={href}
                   href={href}
                   className={`flex items-center gap-3 px-4 py-3 mb-1 rounded-xl transition-all duration-200 
-                    ${isActive
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'text-gray-600 hover:bg-blue-100 hover:text-blue-700'}
+                    ${
+                      isActive
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'text-gray-600 hover:bg-blue-100 hover:text-blue-700'
+                    }
                     ${collapsed ? 'justify-center' : ''}`}
                 >
                   <Icon size={20} className={`${isActive ? 'text-white' : 'text-blue-500'}`} />

@@ -283,13 +283,18 @@ export class BookingService {
     }
 
     const bookings = await prisma.booking.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
+  where,
+  orderBy: { createdAt: 'desc' },
+  include: {
+    property: {
       include: {
-        property: true,
-        room: true,
+        city: true, // ✅ Tambahkan ini
       },
-    });
+    },
+    room: true,
+  },
+});
+
 
     return bookings;
   }

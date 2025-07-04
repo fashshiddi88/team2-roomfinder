@@ -1,4 +1,3 @@
-// src/components/SearchForm.js
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -62,14 +61,17 @@ export default function SearchFormExplore() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 mt-5">
+    <form
+      onSubmit={handleSubmit}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') e.preventDefault(); // ⛔ Cegah reload di semua input
+      }}
+      className="space-y-4 mt-5"
+    >
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Destination */}
         <div className="relative">
-          <label
-            htmlFor="destination"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="destination" className="block text-sm font-medium text-gray-700 mb-1">
             Destination
           </label>
           <select
@@ -90,9 +92,7 @@ export default function SearchFormExplore() {
 
         {/* Check-in Date */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Check-in
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Check-in</label>
           <DatePicker
             selected={checkInDate}
             onChange={(date) => setCheckInDate(date)}
@@ -108,9 +108,7 @@ export default function SearchFormExplore() {
 
         {/* Check-out Date */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Check-out
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Check-out</label>
           <DatePicker
             selected={checkOutDate}
             onChange={(date) => setCheckOutDate(date)}
@@ -126,10 +124,7 @@ export default function SearchFormExplore() {
 
         {/* Guests */}
         <div>
-          <label
-            htmlFor="guests"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="guests" className="block text-sm font-medium text-gray-700 mb-1">
             Guest
           </label>
           <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
