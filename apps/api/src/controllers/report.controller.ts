@@ -69,11 +69,15 @@ export class ReportController {
 
       const year = req.query.year ? Number(req.query.year) : undefined;
       const month = req.query.month ? Number(req.query.month) : undefined;
+      const page = req.query.page ? Number(req.query.page) : 1;
+      const limit = req.query.limit ? Number(req.query.limit) : 10;
 
       const report = await this.reportService.getMonthlyIncomeReport(
         userId,
         year,
         month,
+        page,
+        limit,
       );
 
       return res.status(200).json({

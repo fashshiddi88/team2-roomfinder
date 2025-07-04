@@ -15,11 +15,7 @@ export default function GallerySection({ property }: Props) {
   const [mainImage, setMainImage] = useState(property.image);
 
   useEffect(() => {
-    if (property.propertyImages.length > 0) {
-      setMainImage(property.propertyImages[0]);
-    } else {
-      setMainImage(property.image);
-    }
+    setMainImage(property.image);
   }, [property]);
 
   return (

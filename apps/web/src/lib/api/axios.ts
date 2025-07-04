@@ -466,3 +466,60 @@ export async function setRoomAvailability({
 
   return res.data;
 }
+
+export interface Booking {
+  id: number;
+  orderNumber: string;
+  totalPrice: number;
+  checkinDate: string;
+  checkoutDate: string;
+  status:
+    | 'WAITING_PAYMENT'
+    | 'WAITING_CONFIRMATION'
+    | 'CANCELED'
+    | 'CONFIRMED'
+    | 'DONE'
+    | 'REJECTED'
+    | 'EXPIRED';
+  createdAt: string;
+  property: {
+    name: string;
+  };
+  user: {
+    name: string;
+    email: string;
+  };
+  room: {
+    name: string;
+  };
+}
+
+interface MonthlyIncomeReport {
+  totalIncome: number;
+  bookings: Booking[];
+  month: string;
+  page: number;
+  totalPages: number;
+}
+
+interface ApiResponse {
+  message: string;
+  detail: MonthlyIncomeReport;
+}
+
+export async function getMonthlyIncomeReport(
+  year?: number,
+  month?: number,
+  page: number = 1,
+  limit: number = 10,
+): Promise<ApiResponse> {
+  const params: Record<string, number> = { page, limit };
+  if (year) params.year = year;
+  if (month) params.month = month;
+
+  const res = await api.get<ApiResponse>('/api/dashboard/monthly-income', {
+    params,
+  });
+
+  return res.data;
+}

@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   User,
   Hotel,
+  ChartNoAxesColumnIncreasing,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getProfileTenant } from '@/lib/api/axios';
@@ -20,6 +21,11 @@ import { toast } from 'sonner';
 import Image from 'next/image';
 
 const tenantMenu = [
+  {
+    label: 'Dashboard',
+    href: '/Tenant_Reports',
+    icon: <ChartNoAxesColumnIncreasing size={20} />,
+  },
   { label: 'My Property', href: '/Tenant_Property', icon: <Home size={20} /> },
   {
     label: 'Bookings',
@@ -73,7 +79,7 @@ export default function TenantSidebar() {
   return (
     <aside
       className={`h-screen bg-gradient-to-b from-blue-50 to-white border-r border-gray-200 transition-all duration-300 flex flex-col ${
-        collapsed ? 'w-20' : 'w-64'
+        collapsed ? 'w-20' : 'min-w-64'
       }`}
     >
       {/* Header */}

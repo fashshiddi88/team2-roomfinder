@@ -125,7 +125,13 @@ export class ReportService {
     return result;
   }
 
-  async getMonthlyIncomeReport(userId: number, year?: number, month?: number) {
+  async getMonthlyIncomeReport(
+    userId: number,
+    year?: number,
+    month?: number,
+    page: number = 1,
+    limit: number = 10,
+  ) {
     const tenant = await prisma.tenant.findUnique({
       where: { userId }, // userId dari token
     });
@@ -138,7 +144,7 @@ export class ReportService {
     const today = new Date();
 
     const targetYear = year ?? today.getFullYear();
-    const targetMonth = month ?? today.getMonth() + 1; // getMonth() => 0-based
+    const targetMonth = month ?? today.getMonth() + 1;
 
     const startDate = new Date(targetYear, targetMonth - 1, 1);
     const endDate = new Date(targetYear, targetMonth, 0, 23, 59, 59, 999);
@@ -152,11 +158,25 @@ export class ReportService {
 
     if (propertyIds.length === 0) return { totalIncome: 0, bookings: [] };
 
+    const totalBookings = await prisma.booking.count({
+      where: {
+        propertyId: { in: propertyIds },
+        status: 'CONFIRMED',
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+    });
+
+    const totalPages = Math.ceil(totalBookings / limit);
+    const skip = (page - 1) * limit;
+
     const bookings = await prisma.booking.findMany({
       where: {
         propertyId: { in: propertyIds },
         status: 'CONFIRMED',
-        checkinDate: {
+        createdAt: {
           gte: startDate,
           lte: endDate,
         },
@@ -167,9 +187,15 @@ export class ReportService {
         totalPrice: true,
         checkinDate: true,
         checkoutDate: true,
+        status: true,
+        createdAt: true,
+        property: { select: { name: true } },
         user: { select: { name: true, email: true } },
         room: { select: { name: true } },
       },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
     });
 
     const totalIncome = bookings.reduce((sum, b) => sum + b.totalPrice, 0);
@@ -177,6 +203,8 @@ export class ReportService {
     return {
       totalIncome,
       bookings,
+      page,
+      totalPages,
       month: `${targetYear}-${String(targetMonth).padStart(2, '0')}`,
     };
   }
