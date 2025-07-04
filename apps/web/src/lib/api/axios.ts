@@ -421,3 +421,44 @@ export async function updateUserPassword({
   });
   return response.data;
 }
+
+export async function getRoomAvailability(
+  roomId: number,
+  propertyId: number,
+  month?: string,
+  page = 1,
+  pageSize = 10,
+  sortOrder: 'asc' | 'desc' = 'asc',
+) {
+  const res = await api.get(
+    `/api/property/${propertyId}/room/${roomId}/availability`,
+    {
+      params: { month, page, pageSize, sortOrder },
+    },
+  );
+  return res.data;
+}
+
+interface SetRoomAvailabilityParams {
+  propertyId: number;
+  roomId: number;
+  date: string;
+  available: number;
+}
+
+export async function setRoomAvailability({
+  propertyId,
+  roomId,
+  date,
+  available,
+}: SetRoomAvailabilityParams) {
+  const res = await api.post(
+    `/api/property/${propertyId}/room/${roomId}/availability`,
+    {
+      date,
+      available,
+    },
+  );
+
+  return res.data;
+}

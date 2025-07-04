@@ -91,6 +91,7 @@ export default function TenantRoomTable({ rooms, setRooms }: Props) {
         <tr>
           <th className="p-4">Image</th>
           <th className="p-4">Name</th>
+          <th className="p-4">Availability</th>
           <th className="p-4">Peak Season</th>
           <th className="p-4">Status</th>
           <th className="p-4">Action</th>
@@ -109,6 +110,14 @@ export default function TenantRoomTable({ rooms, setRooms }: Props) {
               />
             </td>
             <td className="p-4 font-semibold">{room.name}</td>
+            <td className="p-4 font-semibold">
+              <Link
+                href={`/Tenant_Property/Manage_Rooms/${propertyId}/Room/${room.id}/Availability`}
+                className="text-blue-600 hover:underline mr-4"
+              >
+                Manage
+              </Link>
+            </td>
             <td className="p-4 font-semibold">
               <Link
                 href={`/Tenant_Property/Manage_Rooms/${propertyId}/Peak_Season/${room.id}`}

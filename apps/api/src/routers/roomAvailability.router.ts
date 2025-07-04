@@ -22,5 +22,13 @@ export class RoomAvailabilityRouter {
         this.roomAvailabilityController,
       ),
     );
+    this.router.get(
+      '/property/:propertyId/room/:roomId/availability',
+      AuthenticationMiddleware.verifyToken,
+      AuthorizationMiddleware.allowRoles('TENANT'),
+      this.roomAvailabilityController.getRoomAvailabilities.bind(
+        this.roomAvailabilityController,
+      ),
+    );
   }
 }
