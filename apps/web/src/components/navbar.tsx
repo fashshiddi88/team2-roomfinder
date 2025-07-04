@@ -91,7 +91,7 @@ export default function Navbar() {
                   </Link>
                   <Link
                     href={
-                      role === 'TENANT' ? '/Tenant_Property' : '/User_Navbar'
+                      role === 'TENANT' ? '/Tenant_Property' : '/User_Bookings'
                     }
                     className="block px-4 py-2 text-sm hover:bg-gray-100"
                     onClick={() => setShowProfileMenu(false)}

@@ -2,7 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import api from '@/lib/api/axios'; // Pastikan sudah benar
 
 interface Property {
   id: string | number;
@@ -11,6 +12,10 @@ interface Property {
   rating: number;
   price: number;
   location: string;
+  isWishlisted?: boolean;
+  category?: {
+    name: string;
+  };
 }
 
 type Props = {
@@ -18,7 +23,7 @@ type Props = {
   checkIn?: string;
   checkOut?: string;
   guests?: number;
-  cityId?: number | string; // ← Tambahan untuk routing Explore
+  cityId?: number | string;
 };
 
 export default function PropertyCard({
@@ -28,33 +33,21 @@ export default function PropertyCard({
   guests,
   cityId,
 }: Props) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(!!property.isWishlisted);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const stored = localStorage.getItem('wishlist');
-    const wishlist = stored ? JSON.parse(stored) : [];
-    const exists = wishlist.some((item: any) => item.id === property.id);
-    setIsWishlisted(exists);
-  }, [property.id]);
-
-  const toggleWishlist = () => {
-    setIsWishlisted((prev) => {
-      const updated = !prev;
-      const stored = localStorage.getItem('wishlist');
-      let wishlist = stored ? JSON.parse(stored) : [];
-
-      if (updated) {
-        wishlist.push(property);
-      } else {
-        wishlist = wishlist.filter((item: any) => item.id !== property.id);
-      }
-
-      localStorage.setItem('wishlist', JSON.stringify(wishlist));
-      return updated;
-    });
+  const toggleWishlist = async () => {
+    try {
+      setLoading(true);
+      await api.post(`/api/wishlist/${property.id}`);
+      setIsWishlisted((prev) => !prev);
+    } catch (error) {
+      console.error('Failed to toggle wishlist:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Build URL params
   const queryParams = new URLSearchParams();
   if (cityId) queryParams.set('cityId', cityId.toString());
   if (checkIn) queryParams.set('checkIn', checkIn);
@@ -74,6 +67,7 @@ export default function PropertyCard({
         <button
           onClick={toggleWishlist}
           className="absolute top-3 left-3 bg-white rounded-full p-1 shadow-md hover:scale-110 transition"
+          disabled={loading}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -108,10 +102,18 @@ export default function PropertyCard({
 
       <div className="p-5">
         <div className="flex justify-between items-start">
-          <h3 className="text-xl font-bold text-gray-900">{property.name}</h3>
-          <div className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-sm font-medium">
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">{property.name}</h3>
+            {property.category?.name && (
+              <p className="text-sm text-gray-500 mt-1">{property.category.name}</p>
+            )}
+          </div>
+
+          <div className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-sm font-medium text-right">
             <span>Rp. </span>
-            <span className="text-lg">{property.price.toLocaleString('id-ID')}</span>
+            <span className="text-lg">
+              {property.price.toLocaleString('id-ID')}
+            </span>
             <span className="text-xs"> /night</span>
           </div>
         </div>
@@ -124,7 +126,11 @@ export default function PropertyCard({
               <svg
                 key={i}
                 xmlns="http://www.w3.org/2000/svg"
-                className={`h-4 w-4 ${i < Math.floor(property.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
+                className={`h-4 w-4 ${
+                  i < Math.floor(property.rating)
+                    ? 'text-yellow-400'
+                    : 'text-gray-300'
+                }`}
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >

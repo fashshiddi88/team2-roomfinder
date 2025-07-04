@@ -82,6 +82,11 @@ export async function getAllCities() {
   const response = await api.get('/api/cities');
   return response.data.data;
 }
+export async function getAllCategories() {
+  const response = await api.get('/api/categories'); // Pastikan endpoint ini tersedia di backend
+  return response.data.data;
+}
+
 
 export async function createProperty(formData: FormData) {
   const response = await api.post('/api/property', formData, {

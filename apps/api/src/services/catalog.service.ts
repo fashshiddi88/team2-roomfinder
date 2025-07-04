@@ -12,6 +12,7 @@ export class CatalogService {
     startDate?: Date;
     endDate?: Date;
     days?: Date[];
+    userId?: number;
   }) {
     const {
       search,
@@ -23,9 +24,17 @@ export class CatalogService {
       capacity,
       startDate,
       endDate,
+      userId,
     } = query;
 
     const skip = (page - 1) * pageSize;
+
+    const wishlistIds = userId
+      ? await prisma.wishlist.findMany({
+          where: { userId },
+          select: { propertyId: true },
+        }).then((list) => list.map((w) => w.propertyId))
+      : [];
 
     const rooms = await prisma.room.findMany({
       where: {
@@ -138,6 +147,7 @@ export class CatalogService {
         address: property.address,
         category: property.category,
         minPrice,
+        isWishlisted: wishlistIds.includes(property.id),
       }),
     );
 
