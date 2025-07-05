@@ -11,6 +11,7 @@ import {
   getPropertyById,
 } from '@/lib/api/axios';
 import { toast } from 'sonner';
+import { AxiosError } from 'axios';
 
 function TenantEditPropertyPage() {
   const router = useRouter();
@@ -39,8 +40,11 @@ function TenantEditPropertyPage() {
       try {
         const data = await getAllPropertyCategories();
         setCategories(data); // pastikan response pakai .data
-      } catch (err) {
-        toast.error('Gagal memuat kategori properti');
+      } catch (error: unknown) {
+        const err = error as AxiosError<{ detail?: string }>;
+        toast.error(
+          err.response?.data?.detail || 'Gagal memuat kategori properti',
+        );
       }
     };
     fetchCategories();
@@ -52,8 +56,9 @@ function TenantEditPropertyPage() {
       try {
         const data = await getAllCities();
         setCities(data); // pastikan response pakai .data
-      } catch (err) {
-        toast.error('Gagal memuat data kota');
+      } catch (error: unknown) {
+        const err = error as AxiosError<{ detail?: string }>;
+        toast.error(err.response?.data?.detail || 'Gagal memuat data kota');
       }
     };
     fetchCities();
@@ -74,8 +79,9 @@ function TenantEditPropertyPage() {
           address: property.address || '',
           cityId: String(property.cityId || ''),
         });
-      } catch (err) {
-        toast.error('Gagal memuat data properti');
+      } catch (error: unknown) {
+        const err = error as AxiosError<{ detail?: string }>;
+        toast.error(err.response?.data?.detail || 'Gagal memuat data properti');
       }
     };
 
@@ -103,9 +109,9 @@ function TenantEditPropertyPage() {
       await updateProperty(Number(id), form, mainImage, galleryImages);
       toast.success('Property berhasil diperbarui');
       router.push('/Tenant_Property');
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || 'Gagal memperbarui property');
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
+      toast.error(err?.response?.data?.detail || 'Gagal memperbarui property');
     } finally {
       setLoading(false);
     }
