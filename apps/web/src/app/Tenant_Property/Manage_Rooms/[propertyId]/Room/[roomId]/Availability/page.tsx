@@ -4,16 +4,18 @@ import { useParams } from 'next/navigation';
 import RoomAvailabilityTable from '../AvailabilityTable';
 import TenantSidebar from '@/app/Tenant_Navbar/page';
 import Link from 'next/link';
-import { withAuthRoles } from '@/middleware/withAuthRoles';
+import { useAuthRole } from '@/app/utils/hook/useAuthRole';
 
-function RoomAvailabilityPage() {
+export default function RoomAvailabilityPage() {
   const params = useParams();
   const propertyId = Number(params.propertyId);
   const roomId = Number(params.roomId);
+  const authorized = useAuthRole(['TENANT']);
 
   if (isNaN(propertyId) || isNaN(roomId)) {
     return <div className="p-6 text-red-500">Invalid Room or Property ID</div>;
   }
+  if (!authorized) return null;
   return (
     <div className="flex min-h-screen bg-gray-50">
       <TenantSidebar />
@@ -48,4 +50,3 @@ function RoomAvailabilityPage() {
     </div>
   );
 }
-export default withAuthRoles(['TENANT'])(RoomAvailabilityPage);

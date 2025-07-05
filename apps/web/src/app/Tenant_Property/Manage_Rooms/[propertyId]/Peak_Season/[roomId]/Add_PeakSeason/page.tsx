@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { getRoomById, setPeakSeasonRate } from '@/lib/api/axios';
-import { withAuthRoles } from '@/middleware/withAuthRoles';
+import { useAuthRole } from '@/app/utils/hook/useAuthRole';
 import TenantSidebar from '@/app/Tenant_Navbar/page';
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
 
-function CreatePeakSeasonPage() {
+export default function CreatePeakSeasonPage() {
+  const authorized = useAuthRole(['TENANT']);
   const router = useRouter();
   const { propertyId, roomId } = useParams();
   const [roomName, setRoomName] = useState('');
@@ -67,7 +68,7 @@ function CreatePeakSeasonPage() {
       setLoading(false);
     }
   };
-
+  if (!authorized) return null;
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
@@ -162,4 +163,3 @@ function CreatePeakSeasonPage() {
     </div>
   );
 }
-export default withAuthRoles(['TENANT'])(CreatePeakSeasonPage);

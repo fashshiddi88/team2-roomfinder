@@ -2,16 +2,17 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { withAuthRoles } from '@/middleware/withAuthRoles';
 import { useState, useEffect } from 'react';
 import TenantSidebar from '../Tenant_Navbar/page';
 import TenantPropertyTable from '@/components/molecules/TenantPropertyTable';
 import { getTenantProperties } from '@/lib/api/axios';
+import { useAuthRole } from '../utils/hook/useAuthRole';
 import { toast } from 'sonner';
 import { PropertyType } from '@/types/property';
 import { AxiosError } from 'axios';
 
-function TenantMyPropertyPage() {
+export default function TenantMyPropertyPage() {
+  const authorized = useAuthRole(['TENANT']);
   const [properties, setProperties] = useState<PropertyType[]>([]);
 
   useEffect(() => {
@@ -28,7 +29,7 @@ function TenantMyPropertyPage() {
     };
     fetchPropertyData();
   }, []);
-
+  if (!authorized) return null;
   return (
     <div className="flex min-h-screen bg-gray-50">
       <TenantSidebar />
@@ -55,4 +56,3 @@ function TenantMyPropertyPage() {
     </div>
   );
 }
-export default withAuthRoles(['TENANT'])(TenantMyPropertyPage);

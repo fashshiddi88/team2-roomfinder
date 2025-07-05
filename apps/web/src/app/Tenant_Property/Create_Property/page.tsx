@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { withAuthRoles } from '@/middleware/withAuthRoles';
+import { useAuthRole } from '@/app/utils/hook/useAuthRole';
 import TenantSidebar from '@/app/Tenant_Navbar/page';
 import {
   getAllCities,
@@ -12,7 +12,8 @@ import {
 import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 
-function TenantAddPropertyPage() {
+export default function TenantAddPropertyPage() {
+  const authorized = useAuthRole(['TENANT']);
   const router = useRouter();
   const [categories, setCategories] = useState<{ id: number; name: string }[]>(
     [],
@@ -98,7 +99,7 @@ function TenantAddPropertyPage() {
       setLoading(false);
     }
   };
-
+  if (!authorized) return null;
   return (
     <div className="flex min-h-screen bg-gray-50">
       <TenantSidebar />
@@ -228,5 +229,3 @@ function TenantAddPropertyPage() {
     </div>
   );
 }
-
-export default withAuthRoles(['TENANT'])(TenantAddPropertyPage);

@@ -16,7 +16,7 @@ import {
 import { useState } from 'react';
 import Swal from 'sweetalert2';
 import { useAuth } from '../utils/hook/useAuth';
-import { withAuthRoles } from '@/middleware/withAuthRoles';
+import { useAuthRole } from '../utils/hook/useAuthRole';
 import Image from 'next/image';
 import { useProfile } from '@/app/context/ProfileContext';
 
@@ -28,7 +28,9 @@ const navItems = [
   { name: 'Settings', href: '/Settings_User', icon: Settings },
 ];
 
-function SideNavbar() {
+export default function SideNavbar() {
+  const authorized = useAuthRole(['USER']);
+
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -53,7 +55,7 @@ function SideNavbar() {
       }
     });
   };
-
+  if (!authorized) return null;
   return (
     <>
       {/* Mobile Toggle */}
@@ -176,4 +178,3 @@ function SideNavbar() {
     </>
   );
 }
-export default withAuthRoles(['USER'])(SideNavbar);

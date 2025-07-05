@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { createRoom, getPropertyById } from '@/lib/api/axios';
-import { withAuthRoles } from '@/middleware/withAuthRoles';
+import { useAuthRole } from '@/app/utils/hook/useAuthRole';
 import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 import TenantSidebar from '@/app/Tenant_Navbar/page';
 
-function TenantAddRoomPage() {
+export default function TenantAddRoomPage() {
+  const authorized = useAuthRole(['TENANT']);
   const router = useRouter();
   const params = useParams();
   const propertyId = params.propertyId as string;
@@ -87,6 +88,7 @@ function TenantAddRoomPage() {
       setLoading(false);
     }
   };
+  if (!authorized) return null;
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -193,4 +195,3 @@ function TenantAddRoomPage() {
     </div>
   );
 }
-export default withAuthRoles(['TENANT'])(TenantAddRoomPage);

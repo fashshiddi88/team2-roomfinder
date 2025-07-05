@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { withAuthRoles } from '@/middleware/withAuthRoles';
+import { useAuthRole } from '@/app/utils/hook/useAuthRole';
 import TenantSidebar from '@/app/Tenant_Navbar/page';
 import {
   getAllCities,
@@ -13,10 +13,11 @@ import {
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
 
-function TenantEditPropertyPage() {
+export default function TenantEditPropertyPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id;
+  const authorized = useAuthRole(['TENANT']);
 
   const [categories, setCategories] = useState<{ id: number; name: string }[]>(
     [],
@@ -116,7 +117,7 @@ function TenantEditPropertyPage() {
       setLoading(false);
     }
   };
-
+  if (!authorized) return null;
   return (
     <div className="flex min-h-screen bg-gray-50">
       <TenantSidebar />
@@ -246,5 +247,3 @@ function TenantEditPropertyPage() {
     </div>
   );
 }
-
-export default withAuthRoles(['TENANT'])(TenantEditPropertyPage);

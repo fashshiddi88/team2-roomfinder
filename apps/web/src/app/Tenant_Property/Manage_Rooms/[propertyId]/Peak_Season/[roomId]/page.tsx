@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { withAuthRoles } from '@/middleware/withAuthRoles';
+import { useAuthRole } from '@/app/utils/hook/useAuthRole';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import TenantSidebar from '@/app/Tenant_Navbar/page';
@@ -12,7 +12,8 @@ import { toast } from 'sonner';
 import { PeakSeasonType } from '@/types/property';
 import { AxiosError } from 'axios';
 
-function TenantMyRoomPage() {
+export default function TenantMyRoomPage() {
+  const authorized = useAuthRole(['TENANT']);
   const { propertyId, roomId } = useParams();
   const [rooms, setRooms] = useState<PeakSeasonType[]>([]);
 
@@ -35,7 +36,7 @@ function TenantMyRoomPage() {
     };
     fetchRoomData();
   }, [roomId]);
-
+  if (!authorized) return null;
   return (
     <div className="flex min-h-screen bg-gray-50">
       <TenantSidebar />
@@ -69,4 +70,3 @@ function TenantMyRoomPage() {
     </div>
   );
 }
-export default withAuthRoles(['TENANT'])(TenantMyRoomPage);

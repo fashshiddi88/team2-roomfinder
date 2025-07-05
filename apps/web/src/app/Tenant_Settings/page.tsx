@@ -6,13 +6,14 @@ import {
   updateUserProfile,
   updateUserPassword,
 } from '@/lib/api/axios';
-import { withAuthRoles } from '@/middleware/withAuthRoles';
+import { useAuthRole } from '../utils/hook/useAuthRole';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { toast } from 'sonner';
 import TenantSidebar from '../Tenant_Navbar/page';
 import { AxiosError } from 'axios';
 
-function TenantSettingsPage() {
+export default function TenantSettingsPage() {
+  const authorized = useAuthRole(['TENANT']);
   const [showPassword1, setShowPassword1] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
   const [showPassword3, setShowPassword3] = useState(false);
@@ -101,7 +102,7 @@ function TenantSettingsPage() {
       toast.error(err.response?.data.detail || 'Terjadi kesalahan.');
     }
   };
-
+  if (!authorized) return null;
   return (
     <div className="flex">
       {/* Sidebar */}
@@ -225,4 +226,3 @@ function TenantSettingsPage() {
     </div>
   );
 }
-export default withAuthRoles(['TENANT'])(TenantSettingsPage);

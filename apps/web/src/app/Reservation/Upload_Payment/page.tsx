@@ -8,14 +8,15 @@ import {
   cancelBookingById,
   uploadPaymentProof,
 } from '@/lib/api/axios';
-import { withAuthRoles } from '@/middleware/withAuthRoles';
+import { useAuthRole } from '@/app/utils/hook/useAuthRole';
 import { BookingSummary } from '@/types/property';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import LoadingScreen from '@/components/LoadingScreen';
 import Swal from 'sweetalert2';
 
-function UploadPaymentPage() {
+export default function UploadPaymentPage() {
+  const authorized = useAuthRole(['TENANT']);
   const router = useRouter();
   const searchParams = useSearchParams();
   const bookingId = Number(searchParams.get('bookingId'));
@@ -172,6 +173,7 @@ function UploadPaymentPage() {
     }
   };
 
+  if (!authorized) return null;
   if (loading) return <LoadingScreen message="Tunggu Sebentar" />;
   if (!summary) return <p>Loading...</p>;
 
@@ -282,4 +284,3 @@ function UploadPaymentPage() {
     </main>
   );
 }
-export default withAuthRoles(['USER'])(UploadPaymentPage);

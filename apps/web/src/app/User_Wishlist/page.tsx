@@ -3,7 +3,7 @@
 import SideNavbar from '@/app/User_Navbar/page';
 import { Heart } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { withAuthRoles } from '@/middleware/withAuthRoles';
+import { useAuthRole } from '../utils/hook/useAuthRole';
 import api from '@/lib/api/axios';
 
 type Property = {
@@ -16,7 +16,8 @@ type Property = {
   mainImage?: string;
 };
 
-function WishlistPage() {
+export default function WishlistPage() {
+  const authorized = useAuthRole(['USER']);
   const [wishlist, setWishlist] = useState<Property[]>([]);
 
   const fetchWishlist = async () => {
@@ -41,7 +42,7 @@ function WishlistPage() {
   useEffect(() => {
     fetchWishlist();
   }, []);
-
+  if (!authorized) return null;
   return (
     <div className="flex">
       <SideNavbar />
@@ -90,4 +91,3 @@ function WishlistPage() {
     </div>
   );
 }
-export default withAuthRoles(['USER'])(WishlistPage);

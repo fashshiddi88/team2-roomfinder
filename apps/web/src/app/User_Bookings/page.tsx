@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { withAuthRoles } from '@/middleware/withAuthRoles';
+import { useAuthRole } from '../utils/hook/useAuthRole';
 import SideNavbar from '@/app/User_Navbar/page';
 import api from '@/lib/api/axios';
 
@@ -23,7 +23,9 @@ interface Booking {
   };
 }
 
-function BookingsPage() {
+export default function BookingsPage() {
+  const authorized = useAuthRole(['USER']);
+
   const [bookings, setBookings] = useState<Booking[]>([]);
 
   useEffect(() => {
@@ -39,7 +41,7 @@ function BookingsPage() {
 
     fetchBookings();
   }, []);
-
+  if (!authorized) return null;
   return (
     <div className="flex">
       <SideNavbar />
@@ -84,4 +86,3 @@ function BookingsPage() {
     </div>
   );
 }
-export default withAuthRoles(['USER'])(BookingsPage);

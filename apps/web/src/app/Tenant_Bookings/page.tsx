@@ -10,12 +10,13 @@ import {
 import { Booking } from '@/types/booking';
 import { AxiosError } from 'axios';
 import { BookingStatus } from '@/types/property';
-import { withAuthRoles } from '@/middleware/withAuthRoles';
+import { useAuthRole } from '../utils/hook/useAuthRole';
 import TenantSidebar from '../Tenant_Navbar/page';
 import { User, Calendar, Check, X, Eye } from 'lucide-react';
 import Swal from 'sweetalert2';
 
-function TenantBookingsPage() {
+export default function TenantBookingsPage() {
+  const authorized = useAuthRole(['TENANT']);
   const tabs = [
     'All',
     'Waiting Payment',
@@ -124,7 +125,7 @@ function TenantBookingsPage() {
       confirmButtonText: 'Tutup',
     });
   };
-
+  if (!authorized) return null;
   return (
     <div className="flex">
       <TenantSidebar />
@@ -280,5 +281,3 @@ function TenantBookingsPage() {
     </div>
   );
 }
-
-export default withAuthRoles(['TENANT'])(TenantBookingsPage);
