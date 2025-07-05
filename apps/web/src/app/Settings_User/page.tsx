@@ -15,7 +15,7 @@ import Image from 'next/image';
 import SideNavbar from '@/app/User_Navbar/page';
 
 export default function UserSettingsPage() {
-  const authorized = useAuthRole(['TENANT']);
+  const authorized = useAuthRole(['USER']);
   const [showPassword1, setShowPassword1] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
   const [showPassword3, setShowPassword3] = useState(false);

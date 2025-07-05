@@ -2,17 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from './useAuth';
 import Swal from 'sweetalert2';
 
 export function useAuthRole(allowedRoles: string[]) {
   const router = useRouter();
+  const { isAuthenticated, role, isAuthLoaded } = useAuth();
   const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role');
+    if (!isAuthLoaded) return;
 
-    if (!token || !allowedRoles.includes(role ?? '')) {
+    if (!isAuthenticated) {
+      router.replace('/');
+      return;
+    }
+
+    if (!allowedRoles.includes(role ?? '')) {
       Swal.fire({
         icon: 'warning',
         title: 'Akses Ditolak',
@@ -24,7 +30,7 @@ export function useAuthRole(allowedRoles: string[]) {
     } else {
       setAuthorized(true);
     }
-  }, [allowedRoles]);
+  }, [isAuthenticated, isAuthLoaded, role, allowedRoles]);
 
   return authorized;
 }

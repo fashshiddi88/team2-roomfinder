@@ -7,7 +7,8 @@ import { getProfileUser } from '@/lib/api/axios';
 import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 import { User } from 'lucide-react';
-import { useAuth } from '@/app/utils/hook/useAuth'; // Pastikan path-nya sesuai
+import { useAuth } from '@/app/utils/hook/useAuth';
+import Swal from 'sweetalert2';
 
 export default function Navbar() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -17,6 +18,9 @@ export default function Navbar() {
   const [profileImg, setProfileImg] = useState('');
 
   useEffect(() => {
+    const role = localStorage.getItem('role');
+    if (role !== 'user') return;
+    if (!localStorage.getItem('token')) return;
     const fetchUserData = async () => {
       try {
         const profile = await getProfileUser();
@@ -109,8 +113,20 @@ export default function Navbar() {
                   </Link>
                   <button
                     onClick={() => {
-                      logout();
-                      setShowProfileMenu(false);
+                      Swal.fire({
+                        title: 'Yakin ingin logout?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Iya',
+                        cancelButtonText: 'Batal',
+                      }).then((result) => {
+                        if (result.isConfirmed) {
+                          logout();
+                          setShowProfileMenu(false);
+                        }
+                      });
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                   >

@@ -43,9 +43,11 @@ export default function TenantSidebar() {
   const [userId, setUserId] = useState<number | null>(null);
   const [name, setName] = useState('');
   const [profileImg, setProfileImg] = useState('');
-  const { logout } = useAuth();
+  const { isAuthenticated, logout, isAuthLoaded } = useAuth();
 
   useEffect(() => {
+    if (!isAuthLoaded || !isAuthenticated || !localStorage.getItem('token'))
+      return;
     const fetchUserData = async () => {
       try {
         const profile = await getProfileTenant();
@@ -65,7 +67,7 @@ export default function TenantSidebar() {
       }
     };
     fetchUserData();
-  }, []);
+  }, [isAuthLoaded, isAuthenticated]);
 
   const handleLogoutClick = () => {
     Swal.fire({
@@ -82,6 +84,7 @@ export default function TenantSidebar() {
       }
     });
   };
+  if (!isAuthLoaded) return null;
 
   return (
     <aside
