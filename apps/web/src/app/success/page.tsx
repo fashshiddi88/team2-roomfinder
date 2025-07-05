@@ -3,6 +3,9 @@
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { CheckCircle, XCircle, Clock } from 'lucide-react';
+import { AxiosError } from 'axios';
+import { toast } from 'sonner';
+import Link from 'next/link';
 
 type TransactionStatus = 'success' | 'pending' | 'failed';
 
@@ -20,7 +23,9 @@ export default function PaymentSuccessPage() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('order_id');
 
-  const [transaction, setTransaction] = useState<TransactionDetail | null>(null);
+  const [transaction, setTransaction] = useState<TransactionDetail | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,7 +37,7 @@ export default function PaymentSuccessPage() {
         const res = await fetch(`/api/transaction/${orderId}`);
         const data = await res.json();
         setTransaction(data);
-      } catch (err) {
+      } catch (error: unknown) {
         setTransaction({
           orderId: orderId!,
           propertyName: 'Unknown',
@@ -42,6 +47,10 @@ export default function PaymentSuccessPage() {
           totalPrice: 0,
           status: 'failed',
         });
+        const err = error as AxiosError<{ detail?: string }>;
+        toast.error(
+          err.response?.data?.detail || 'Gagal memuat status transaksi',
+        );
       } finally {
         setLoading(false);
       }
@@ -99,23 +108,41 @@ export default function PaymentSuccessPage() {
         <div className="text-center">{getStatusUI(transaction.status)}</div>
 
         <div className="text-sm border-t pt-4 space-y-2">
-          <p><span className="font-medium">Order ID:</span> {transaction.orderId}</p>
-          <p><span className="font-medium">Properti:</span> {transaction.propertyName}</p>
-          <p><span className="font-medium">Tipe Kamar:</span> {transaction.roomType}</p>
-          <p><span className="font-medium">Check-in:</span> {transaction.checkIn}</p>
-          <p><span className="font-medium">Check-out:</span> {transaction.checkOut}</p>
-          <p><span className="font-medium">Total Harga:</span> Rp {transaction.totalPrice.toLocaleString('id-ID')}</p>
+          <p>
+            <span className="font-medium">Order ID:</span> {transaction.orderId}
+          </p>
+          <p>
+            <span className="font-medium">Properti:</span>{' '}
+            {transaction.propertyName}
+          </p>
+          <p>
+            <span className="font-medium">Tipe Kamar:</span>{' '}
+            {transaction.roomType}
+          </p>
+          <p>
+            <span className="font-medium">Check-in:</span> {transaction.checkIn}
+          </p>
+          <p>
+            <span className="font-medium">Check-out:</span>{' '}
+            {transaction.checkOut}
+          </p>
+          <p>
+            <span className="font-medium">Total Harga:</span> Rp{' '}
+            {transaction.totalPrice.toLocaleString('id-ID')}
+          </p>
         </div>
 
         {transaction.status === 'success' && (
           <div className="p-4 bg-green-100 text-green-800 rounded-md text-sm">
-            Terima kasih! Detail pemesanan telah dikirim ke email kamu. Silakan cek inbox atau folder spam.
+            Terima kasih! Detail pemesanan telah dikirim ke email kamu. Silakan
+            cek inbox atau folder spam.
           </div>
         )}
 
         {transaction.status === 'pending' && (
           <div className="p-4 bg-yellow-100 text-yellow-800 rounded-md text-sm">
-            Mohon segera selesaikan pembayaran sebelum batas waktu yang ditentukan. Jika tidak, pesanan akan otomatis dibatalkan.
+            Mohon segera selesaikan pembayaran sebelum batas waktu yang
+            ditentukan. Jika tidak, pesanan akan otomatis dibatalkan.
           </div>
         )}
 
@@ -132,12 +159,12 @@ export default function PaymentSuccessPage() {
           >
             Lihat Transaksi Saya
           </a>
-          <a
+          <Link
             href="/"
             className="border border-gray-300 hover:bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded"
           >
             Kembali ke Beranda
-          </a>
+          </Link>
         </div>
       </div>
     </div>

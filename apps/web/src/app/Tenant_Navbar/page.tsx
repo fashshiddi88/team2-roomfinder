@@ -15,6 +15,7 @@ import {
   Hotel,
   ChartNoAxesColumnIncreasing,
 } from 'lucide-react';
+import { AxiosError } from 'axios';
 import { useState, useEffect } from 'react';
 import { getProfileTenant } from '@/lib/api/axios';
 import { toast } from 'sonner';
@@ -51,10 +52,16 @@ export default function TenantSidebar() {
         const data = profile.detail;
 
         setUserId(data.id);
+        if (userId !== null) {
+          console.log('Current user ID:', userId);
+        }
         setName(data.tenant?.companyName);
         setProfileImg(data.profilePhoto);
-      } catch (error) {
-        toast.error('Gagal memuat data pengguna.');
+      } catch (error: unknown) {
+        const axiosErr = error as AxiosError<{ message: string }>;
+        toast.error(
+          axiosErr.response?.data?.message || 'Gagal memuat data pengguna.',
+        );
       }
     };
     fetchUserData();

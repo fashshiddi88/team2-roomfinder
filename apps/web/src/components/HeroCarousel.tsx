@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 export default function HeroCarousel() {
@@ -8,23 +8,23 @@ export default function HeroCarousel() {
   const [isPaused, setIsPaused] = useState(false);
   const slides = [
     {
-      title: "Find the Best Accommodation",
-      subtitle: "Compare prices and facilities with ease",
-      image: "/hotel1.jpg",
-      cta: "Explore Now"
+      title: 'Find the Best Accommodation',
+      subtitle: 'Compare prices and facilities with ease',
+      image: '/hotel1.jpg',
+      cta: 'Explore Now',
     },
     {
-      title: "Special Weekend Discounts",
-      subtitle: "Get the best prices for your vacation",
-      image: "/diskon_hotel.jpeg",
-      cta: "See Promotions"
+      title: 'Special Weekend Discounts',
+      subtitle: 'Get the best prices for your vacation',
+      image: '/diskon_hotel.jpeg',
+      cta: 'See Promotions',
     },
     {
-      title: "Unforgettable Stay Experience",
-      subtitle: "Thousands of premium selected properties",
-      image: "/sakura.jpg",
-      cta: "Find Properties"
-    }
+      title: 'Unforgettable Stay Experience',
+      subtitle: 'Thousands of premium selected properties',
+      image: '/sakura.jpg',
+      cta: 'Find Properties',
+    },
   ];
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function HeroCarousel() {
   }, [slides.length, isPaused]);
 
   return (
-    <div 
+    <div
       className="relative h-[500px] overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -47,7 +47,9 @@ export default function HeroCarousel() {
         <div
           key={index}
           className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-            index === currentSlide ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            index === currentSlide
+              ? 'opacity-100'
+              : 'opacity-0 pointer-events-none'
           }`}
           aria-hidden={index !== currentSlide}
         >

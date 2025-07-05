@@ -2,10 +2,7 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import {
-  getCatalogProperties,
-  getAllCities,
-} from '@/lib/api/axios';
+import { getCatalogProperties, getAllCities } from '@/lib/api/axios';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import Navbar from '@/components/navbar';
@@ -20,6 +17,11 @@ type Property = {
   categoryId: number;
   minPrice: number;
   category?: { name: string };
+};
+
+type City = {
+  id: number | string;
+  name: string;
 };
 
 export default function ExplorePage() {
@@ -42,7 +44,7 @@ export default function ExplorePage() {
     const fetchCityName = async () => {
       try {
         const cities = await getAllCities();
-        const found = cities.find((c: any) => String(c.id) === String(cityId));
+        const found = cities.find((c: City) => String(c.id) === String(cityId));
         const name = found?.name || '';
         setCityName(name);
       } catch {
@@ -59,7 +61,7 @@ export default function ExplorePage() {
       setLoading(true);
       try {
         const cities = await getAllCities();
-        const found = cities.find((c: any) => String(c.id) === String(cityId));
+        const found = cities.find((c: City) => String(c.id) === String(cityId));
         const name = found?.name || '';
         setCityName(name);
 
@@ -97,7 +99,6 @@ export default function ExplorePage() {
             <SearchFormExplore />
           </div>
         </section>
-
 
         <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
           <h1 className="text-xl md:text-2xl font-bold text-center md:text-left">
@@ -144,7 +145,9 @@ export default function ExplorePage() {
                 </div>
                 <div className="flex-1 flex flex-col justify-between">
                   <div>
-                    <h2 className="text-xl font-semibold mb-1">{property.name}</h2>
+                    <h2 className="text-xl font-semibold mb-1">
+                      {property.name}
+                    </h2>
                     <p className="text-gray-600 mb-1">{property.address}</p>
                     <p className="text-sm text-amber-500 font-medium">
                       {property.category?.name || 'Tidak diketahui'}
@@ -155,12 +158,14 @@ export default function ExplorePage() {
                       <p className="text-2xl font-bold text-orange-600">
                         Rp {property.minPrice.toLocaleString('id-ID')}
                       </p>
-                      <p className="text-sm text-gray-500">per malam (termurah)</p>
+                      <p className="text-sm text-gray-500">
+                        per malam (termurah)
+                      </p>
                     </div>
                     <button
                       onClick={() =>
                         router.push(
-                          `/Explore/${property.id}?cityId=${cityId}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`
+                          `/Explore/${property.id}?cityId=${cityId}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`,
                         )
                       }
                       className="bg-orange-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-orange-600"

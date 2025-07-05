@@ -9,6 +9,7 @@ import {
   getAllPropertyCategories,
   createProperty,
 } from '@/lib/api/axios';
+import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 
 function TenantAddPropertyPage() {
@@ -35,8 +36,11 @@ function TenantAddPropertyPage() {
       try {
         const data = await getAllPropertyCategories();
         setCategories(data); // pastikan response pakai .data
-      } catch (err) {
-        toast.error('Gagal memuat kategori properti');
+      } catch (error: unknown) {
+        const err = error as AxiosError<{ detail?: string }>;
+        toast.error(
+          err.response?.data?.detail || 'Gagal memuat kategori properti',
+        );
       }
     };
     fetchCategories();
@@ -48,8 +52,9 @@ function TenantAddPropertyPage() {
       try {
         const data = await getAllCities();
         setCities(data); // pastikan response pakai .data
-      } catch (err) {
-        toast.error('Gagal memuat data kota');
+      } catch (error: unknown) {
+        const err = error as AxiosError<{ detail?: string }>;
+        toast.error(err.response?.data?.detail || 'Gagal memuat data kota');
       }
     };
     fetchCities();
@@ -87,9 +92,9 @@ function TenantAddPropertyPage() {
       console.log(res);
       toast.success('Berhasil menambahkan properti');
       router.push('/Tenant_Property');
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || 'Gagal menambahkan properti');
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
+      toast.error(err.response?.data?.detail || 'Gagal menambahkan properti');
       setLoading(false);
     }
   };

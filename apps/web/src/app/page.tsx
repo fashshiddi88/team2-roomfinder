@@ -17,7 +17,16 @@ interface Property {
   price: number;
   rating: number;
   location: string;
+  cityName?: string;
+  rooms?: { price?: number }[];
+  isWishlisted?: boolean;
+  minPrice?: number;
 }
+
+type City = {
+  id: number | string;
+  name: string;
+};
 
 export default function HomePage() {
   const [recommendedStays, setRecommendedStays] = useState<Property[]>([]);
@@ -32,7 +41,7 @@ export default function HomePage() {
         tomorrow.setDate(now.getDate() + 1);
 
         const responses = await Promise.all(
-          cities.map((city: any) =>
+          cities.map((city: City) =>
             getCatalogProperties({
               search: city.name,
               sortBy: 'price',
@@ -42,12 +51,12 @@ export default function HomePage() {
               startDate: now,
               endDate: tomorrow,
               capacity: 1,
-            })
-          )
+            }),
+          ),
         );
 
         const allProperties = responses.flatMap((res, index) =>
-          (res?.data || []).map((prop: any) => ({
+          (res?.data || []).map((prop: Property) => ({
             id: prop.id,
             name: prop.name,
             image: prop.image || '/default-room.jpg',
@@ -55,11 +64,11 @@ export default function HomePage() {
             price: prop.minPrice ?? prop.rooms?.[0]?.price ?? prop.price ?? 0,
             rating: prop.rating || 4.5,
             isWishlisted: prop.isWishlisted ?? false,
-          }))
+          })),
         );
 
         const uniqueProperties = Array.from(
-          new Map(allProperties.map((item) => [item.id, item])).values()
+          new Map(allProperties.map((item) => [item.id, item])).values(),
         );
 
         setRecommendedStays(uniqueProperties);
@@ -121,7 +130,6 @@ export default function HomePage() {
             <SearchForm />
           </div>
         </section>
-
 
         {/* Recommended */}
         <section className="max-w-screen-xl mx-auto">

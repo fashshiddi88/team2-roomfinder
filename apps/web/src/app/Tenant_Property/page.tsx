@@ -9,6 +9,7 @@ import TenantPropertyTable from '@/components/molecules/TenantPropertyTable';
 import { getTenantProperties } from '@/lib/api/axios';
 import { toast } from 'sonner';
 import { PropertyType } from '@/types/property';
+import { AxiosError } from 'axios';
 
 function TenantMyPropertyPage() {
   const [properties, setProperties] = useState<PropertyType[]>([]);
@@ -18,8 +19,11 @@ function TenantMyPropertyPage() {
       try {
         const property = await getTenantProperties();
         setProperties(property.data);
-      } catch (error) {
-        toast.error('Gagal memuat data properti.');
+      } catch (error: unknown) {
+        const err = error as AxiosError<{ detail?: string }>;
+        toast.error(
+          err.response?.data?.detail || 'Gagal memuat data properti.',
+        );
       }
     };
     fetchPropertyData();

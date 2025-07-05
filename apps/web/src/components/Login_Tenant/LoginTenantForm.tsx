@@ -12,6 +12,7 @@ import Link from 'next/link';
 import LoadingScreen from '../LoadingScreen';
 import { useAuth } from '@/app/utils/hook/useAuth';
 import { useRouter } from 'next/navigation';
+import { AxiosError } from 'axios';
 
 export default function LoginTenantForm() {
   const [email, setEmail] = useState('');
@@ -37,6 +38,9 @@ export default function LoginTenantForm() {
         email: fieldErrors.email?._errors[0],
         password: fieldErrors.password?._errors[0],
       });
+      if (errors !== null) {
+        console.log('Current user ID:', errors);
+      }
       return;
     }
 
@@ -58,11 +62,10 @@ export default function LoginTenantForm() {
       login(access_token, role, id);
       toast.success('Login berhasil!');
       router.push('/Tenant_Property');
-    } catch (error: any) {
-      console.error(error);
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
       toast.error(
-        error.response?.data?.message ||
-          'Email atau password salah, coba lagi.',
+        err.response?.data?.detail || 'Email atau password salah, coba lagi.',
       );
       setLoading(false);
     }

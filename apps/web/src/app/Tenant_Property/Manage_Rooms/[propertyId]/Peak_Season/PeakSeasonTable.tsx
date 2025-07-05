@@ -4,6 +4,14 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getPeakSeasonsByRoomId } from '@/lib/api/axios';
 import { toast } from 'sonner';
+import { AxiosError } from 'axios';
+type PeakSeason = {
+  id: number;
+  startDate: string;
+  endDate: string;
+  priceModifierType: string;
+  priceModifierValue: number;
+};
 
 export default function PeakSeasonTable() {
   const { roomId } = useParams();
@@ -17,8 +25,11 @@ export default function PeakSeasonTable() {
         const res = await getPeakSeasonsByRoomId(Number(roomId), page, 5);
         setPeakSeasons(res.data);
         setTotalPages(res.totalPages);
-      } catch (err) {
-        toast.error('Gagal memuat data peak season');
+      } catch (error: unknown) {
+        const err = error as AxiosError<{ detail?: string }>;
+        toast.error(
+          err.response?.data?.detail || 'Gagal memuat data peak season',
+        );
       }
     };
     if (roomId) fetchData();
@@ -36,7 +47,7 @@ export default function PeakSeasonTable() {
           </tr>
         </thead>
         <tbody>
-          {peakSeasons.map((peak: any) => (
+          {peakSeasons.map((peak: PeakSeason) => (
             <tr key={peak.id} className="border-b hover:bg-gray-50 h-24">
               <td className="p-4">
                 {new Date(peak.startDate).toLocaleDateString()}

@@ -6,6 +6,7 @@ import DatePicker from 'react-datepicker';
 import { getAllCities } from '@/lib/api/axios';
 import { toast } from 'sonner';
 import 'react-datepicker/dist/react-datepicker.css';
+import { AxiosError } from 'axios';
 
 export default function SearchFormExplore() {
   const [checkInDate, setCheckInDate] = useState<Date | null>(null);
@@ -27,8 +28,9 @@ export default function SearchFormExplore() {
       try {
         const data = await getAllCities();
         setCities(data);
-      } catch (err) {
-        toast.error('Gagal memuat data kota');
+      } catch (error: unknown) {
+        const err = error as AxiosError<{ detail?: string }>;
+        toast.error(err.response?.data?.detail || 'Gagal memuat data kota');
       }
     };
     fetchCities();
@@ -71,7 +73,10 @@ export default function SearchFormExplore() {
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Destination */}
         <div className="relative">
-          <label htmlFor="destination" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="destination"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Destination
           </label>
           <select
@@ -92,7 +97,9 @@ export default function SearchFormExplore() {
 
         {/* Check-in Date */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Check-in</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Check-in
+          </label>
           <DatePicker
             selected={checkInDate}
             onChange={(date) => setCheckInDate(date)}
@@ -108,7 +115,9 @@ export default function SearchFormExplore() {
 
         {/* Check-out Date */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Check-out</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Check-out
+          </label>
           <DatePicker
             selected={checkOutDate}
             onChange={(date) => setCheckOutDate(date)}
@@ -124,7 +133,10 @@ export default function SearchFormExplore() {
 
         {/* Guests */}
         <div>
-          <label htmlFor="guests" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="guests"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Guest
           </label>
           <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">

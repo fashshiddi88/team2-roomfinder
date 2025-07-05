@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { createRoom, getPropertyById } from '@/lib/api/axios';
 import { withAuthRoles } from '@/middleware/withAuthRoles';
+import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 import TenantSidebar from '@/app/Tenant_Navbar/page';
 
@@ -34,8 +35,9 @@ function TenantAddRoomPage() {
       try {
         const res = await getPropertyById(numericId);
         setPropertyName(res.data.name);
-      } catch (err) {
-        toast.error('Gagal memuat nama properti');
+      } catch (error: unknown) {
+        const err = error as AxiosError<{ detail?: string }>;
+        toast.error(err.response?.data?.detail || 'Gagal memuat nama properti');
       }
     };
 
@@ -79,8 +81,9 @@ function TenantAddRoomPage() {
       await createRoom(numericPropertyId, formData);
       toast.success('Berhasil menambahkan kamar');
       router.push(`/Tenant_Property/Manage_Rooms/${propertyId}`);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Gagal menambahkan kamar');
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
+      toast.error(err.response?.data?.detail || 'Gagal menambahkan kamar');
       setLoading(false);
     }
   };

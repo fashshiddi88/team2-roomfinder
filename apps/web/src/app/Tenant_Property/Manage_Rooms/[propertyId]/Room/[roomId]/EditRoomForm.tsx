@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateRoom, getRoomById } from '@/lib/api/axios';
 import { toast } from 'sonner';
+import { AxiosError } from 'axios';
 import TenantSidebar from '@/app/Tenant_Navbar/page';
 
 export default function EditRoomPage({
@@ -41,8 +42,9 @@ export default function EditRoomPage({
           capacity: room.capacity,
           basePrice: room.basePrice,
         });
-      } catch (err) {
-        toast.error('Gagal memuat data room');
+      } catch (error: unknown) {
+        const err = error as AxiosError<{ detail?: string }>;
+        toast.error(err.response?.data?.detail || 'Gagal memuat data room');
       }
     };
 
@@ -68,9 +70,9 @@ export default function EditRoomPage({
       await updateRoom(propertyId, roomId, form, imageFile);
       toast.success('Room berhasil diperbarui');
       router.push(`/Tenant_Property/Manage_Rooms/${propertyId}`);
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || 'Gagal memperbarui room');
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
+      toast.error(err?.response?.data?.detail || 'Gagal memperbarui room');
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { AxiosError } from 'axios';
 import {
   getProfileUser,
   updateUserProfile,
@@ -101,9 +102,11 @@ function UserSettingsPage() {
       await updateUserProfile(formData);
 
       toast.success('Berhasil memperbarui profil');
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || 'Gagal memperbarui profil');
+    } catch (err: unknown) {
+      const axiosErr = err as AxiosError<{ message: string }>;
+      toast.error(
+        axiosErr.response?.data?.message || 'Gagal memperbarui profil',
+      );
     }
   };
 
@@ -130,9 +133,10 @@ function UserSettingsPage() {
         newPassword: '',
         confirmNewPassword: '',
       });
-    } catch (error: any) {
-      console.error('Update password error:', error?.response?.data);
-      toast.error(error.response.data.detail || 'Terjadi kesalahan.');
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
+      console.error('Update password error:', err.response?.data);
+      toast.error(err.response?.data?.detail || 'Terjadi kesalahan.');
     }
   };
 

@@ -9,6 +9,7 @@ import Button from '../atomics/Button';
 import Text from '../atomics/Text';
 import LoadingScreen from '../LoadingScreen';
 import { verifyPasswordSchema } from '@/lib/validations/validations.schema';
+import { AxiosError } from 'axios';
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -52,8 +53,9 @@ export default function RegisterForm() {
       await registerSetPassword(token, password);
       toast.success('Password berhasil disimpan! Silakan login.');
       setSuccess(true); // baru trigger redirect via useEffect
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Gagal menyimpan password.');
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
+      toast.error(err.response?.data?.detail || 'Gagal menyimpan password.');
     } finally {
       setLoading(false);
     }

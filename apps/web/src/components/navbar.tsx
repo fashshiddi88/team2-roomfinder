@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { getProfileUser } from '@/lib/api/axios';
+import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 import { User } from 'lucide-react';
 import { useAuth } from '@/app/utils/hook/useAuth'; // Pastikan path-nya sesuai
@@ -22,9 +23,18 @@ export default function Navbar() {
         const data = profile.detail;
 
         setUserId(data.id);
+        if (userId !== null) {
+          console.log('Current user ID:', userId);
+        }
         setName(data.name);
+        if (name !== null) {
+          console.log(name);
+        }
         setProfileImg(data.profilePhoto);
-      } catch (error) {}
+      } catch (error: unknown) {
+        const err = error as AxiosError<{ detail?: string }>;
+        toast.error(err.response?.data?.detail || 'Terjadi kesalahan.');
+      }
     };
     fetchUserData();
   }, []);

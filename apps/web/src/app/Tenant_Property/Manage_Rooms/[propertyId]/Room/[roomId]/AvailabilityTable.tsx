@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { getRoomAvailability } from '@/lib/api/axios';
 
+type Data = {
+  id: number;
+  date: string;
+  available: number;
+};
+
 export default function RoomAvailabilityTable({
   roomId,
   propertyId,
@@ -8,7 +14,7 @@ export default function RoomAvailabilityTable({
   roomId: number;
   propertyId: number;
 }) {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<Data[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(5);
   const [month, setMonth] = useState('');

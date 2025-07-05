@@ -6,6 +6,7 @@ import { getRoomById, setPeakSeasonRate } from '@/lib/api/axios';
 import { withAuthRoles } from '@/middleware/withAuthRoles';
 import TenantSidebar from '@/app/Tenant_Navbar/page';
 import { toast } from 'sonner';
+import { AxiosError } from 'axios';
 
 function CreatePeakSeasonPage() {
   const router = useRouter();
@@ -27,8 +28,9 @@ function CreatePeakSeasonPage() {
         const parsedRoomId = Array.isArray(roomId) ? roomId[0] : roomId;
         const room = await getRoomById(Number(parsedRoomId));
         setRoomName(room.data.name);
-      } catch (err) {
-        toast.error('Gagal memuat nama kamar');
+      } catch (error: unknown) {
+        const err = error as AxiosError<{ detail?: string }>;
+        toast.error(err.response?.data?.detail || 'Gagal memuat nama kamar');
       }
     };
 
@@ -57,9 +59,10 @@ function CreatePeakSeasonPage() {
       router.push(
         `/Tenant_Property/Manage_Rooms/${propertyId}/Peak_Season/${roomId}`,
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
       toast.error(
-        error?.response?.data?.message || 'Gagal menambahkan peak season',
+        err?.response?.data?.detail || 'Gagal menambahkan peak season',
       );
       setLoading(false);
     }

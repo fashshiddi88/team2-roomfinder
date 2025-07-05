@@ -2,18 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { AxiosError } from 'axios';
 import {
   getProfileUser,
   getPropertyDetail,
   createBooking,
 } from '@/lib/api/axios';
-import { withAuthRoles } from '@/middleware/withAuthRoles';
 import { toast } from 'sonner';
 import type { Property, BookingTypeEnum } from '@/types/property';
 import Image from 'next/image';
 import LoadingScreen from '@/components/LoadingScreen';
 
-function BookingPage() {
+export default function BookingPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -63,8 +63,11 @@ function BookingPage() {
           new Date(checkOut),
         );
         setProperty(data);
-      } catch (err) {
-        toast.error('Gagal mengambil detail properti');
+      } catch (err: unknown) {
+        const axiosErr = err as AxiosError<{ message: string }>;
+        toast.error(
+          axiosErr.response?.data?.message || 'Gagal mengambil detail properti',
+        );
       } finally {
         setIsLoading(false); // ⬅ Hanya selesai kalau fetch selesai
       }
@@ -136,9 +139,10 @@ function BookingPage() {
       } else {
         router.push(`/Reservation/Upload_Payment?bookingId=${booking.id}`);
       }
-    } catch (err: any) {
-      console.error(err.response?.data || err.message || err);
-      toast.error(err.response?.data?.message || 'Gagal membuat booking');
+    } catch (err: unknown) {
+      const axiosErr = err as AxiosError<{ message: string }>;
+      console.error(axiosErr.response?.data || axiosErr.message || err);
+      toast.error(axiosErr.response?.data?.message || 'Gagal membuat booking');
     }
   };
   if (isLoading) return <LoadingScreen message="Tunggu Sebentar" />;
@@ -281,4 +285,3 @@ function BookingPage() {
     </div>
   );
 }
-export default withAuthRoles(['USER'])(BookingPage);

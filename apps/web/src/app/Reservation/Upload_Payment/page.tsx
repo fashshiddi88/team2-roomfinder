@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, ChangeEvent } from 'react';
+import { useState, useEffect } from 'react';
+import { AxiosError } from 'axios';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   getBookingById,
@@ -70,8 +71,17 @@ function UploadPaymentPage() {
       try {
         const res = await getBookingById(bookingId);
         setSummary(res);
-      } catch (err: any) {
-        toast.error(err.response?.data?.message || 'Gagal ambil data booking');
+      } catch (err: unknown) {
+        if (err instanceof Error && 'response' in err) {
+          const axiosError = err as {
+            response?: { data?: { message?: string } };
+          };
+          toast.error(
+            axiosError.response?.data?.message || 'Gagal ambil data booking',
+          );
+        } else {
+          toast.error('Gagal ambil data booking');
+        }
       } finally {
         setLoading(false);
       }
@@ -126,8 +136,11 @@ function UploadPaymentPage() {
         const res = await cancelBookingById(bookingId);
         toast.success(res.message);
         router.push('/');
-      } catch (err: any) {
-        toast.error(err.response?.data?.message || 'Failed to cancel booking');
+      } catch (err: unknown) {
+        const axiosErr = err as AxiosError<{ message: string }>;
+        toast.error(
+          axiosErr.response?.data?.message || 'Failed to cancel booking',
+        );
       }
     }
   };
@@ -150,10 +163,11 @@ function UploadPaymentPage() {
       });
 
       router.push('/');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Upload error:', error);
+      const axiosErr = error as AxiosError<{ message: string }>;
       toast.error(
-        error.response?.data?.message || 'Gagal upload bukti pembayaran',
+        axiosErr.response?.data?.message || 'Gagal upload bukti pembayaran',
       );
     }
   };

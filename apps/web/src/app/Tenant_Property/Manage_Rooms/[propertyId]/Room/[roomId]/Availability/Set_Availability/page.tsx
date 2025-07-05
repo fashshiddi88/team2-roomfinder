@@ -3,6 +3,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { setRoomAvailability } from '@/lib/api/axios';
 import { useState } from 'react';
 import TenantSidebar from '@/app/Tenant_Navbar/page';
+import { AxiosError } from 'axios';
 
 export default function SetAvailabilityPage() {
   const { propertyId, roomId } = useParams();
@@ -29,9 +30,9 @@ export default function SetAvailabilityPage() {
       router.push(
         `/Tenant_Property/Manage_Rooms/${propertyId}/Room/${roomId}/Availability`,
       );
-    } catch (err: any) {
-      console.error(err);
-      setErrorMsg(err.response?.data?.message || 'Terjadi kesalahan');
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
+      setErrorMsg(err.response?.data?.detail || 'Terjadi kesalahan');
     } finally {
       setLoading(false);
     }

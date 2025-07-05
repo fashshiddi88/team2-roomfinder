@@ -1,15 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import Button from '../atomics/Button';
 import Text from '../atomics/Text';
 import LoadingScreen from '../LoadingScreen';
 import { forgotPassword } from '@/lib/api/axios';
+import { AxiosError } from 'axios';
 
 export default function ForgotPassword() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -21,8 +20,9 @@ export default function ForgotPassword() {
       const res = await forgotPassword(email);
       toast.success(res.message || 'Cek email kamu untuk mereset password.');
       setSuccess(true);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Gagal mengirim email.');
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
+      toast.error(err.response?.data?.detail || 'Gagal mengirim email.');
     } finally {
       setLoading(false);
     }

@@ -1,0 +1,50 @@
+export type Booking = {
+  id: number;
+  userId: number;
+  propertyId: number;
+  roomId: number;
+  orderNumber: string;
+  checkinDate: string;
+  checkoutDate: string;
+  totalPrice: number;
+  status: string;
+  bookingType: string;
+  paymentProof: string;
+  autoCanceledAt: string | null;
+  confirmedAt: string | null;
+  rejectedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  expiredAt: string;
+  deleteAt: string | null;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    phone: string;
+    profilePhoto: string;
+    isVerified: boolean;
+    role: string;
+    authProvider: string;
+    verificationToken: string | null;
+    verificationExpires: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+  room: {
+    id: number;
+    propertyId: number;
+    name: string;
+    description: string;
+    image: string;
+    qty: number;
+    basePrice: number;
+    capacity: number;
+    createdAt: string;
+    updatedAt: string;
+    deletedAt: string | null;
+  };
+  property: {
+    name: string;
+  };
+};

@@ -10,6 +10,7 @@ import { withAuthRoles } from '@/middleware/withAuthRoles';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { toast } from 'sonner';
 import TenantSidebar from '../Tenant_Navbar/page';
+import { AxiosError } from 'axios';
 
 function TenantSettingsPage() {
   const [showPassword1, setShowPassword1] = useState(false);
@@ -66,9 +67,9 @@ function TenantSettingsPage() {
       await updateUserProfile(formData);
 
       toast.success('Berhasil memperbarui profil');
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || 'Gagal memperbarui profil');
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
+      toast.error(err?.response?.data?.detail || 'Gagal memperbarui profil');
     }
   };
 
@@ -95,9 +96,9 @@ function TenantSettingsPage() {
         newPassword: '',
         confirmNewPassword: '',
       });
-    } catch (error: any) {
-      console.error('Update password error:', error?.response?.data);
-      toast.error(error.response.data.detail || 'Terjadi kesalahan.');
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
+      toast.error(err.response?.data.detail || 'Terjadi kesalahan.');
     }
   };
 

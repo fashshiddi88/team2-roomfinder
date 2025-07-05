@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import Button from '../atomics/Button';
 import Text from '../atomics/Text';
@@ -9,9 +8,9 @@ import LoadingScreen from '../LoadingScreen';
 import { registerUser } from '@/lib/api/axios';
 import Link from 'next/link';
 import { FcGoogle } from 'react-icons/fc';
+import { AxiosError } from 'axios';
 
 export default function RegisterForm() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -23,8 +22,9 @@ export default function RegisterForm() {
       const res = await registerUser(email);
       toast.success(res.message || 'Cek email kamu untuk verifikasi.');
       setSuccess(true);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Register gagal.');
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
+      toast.error(err.response?.data?.detail || 'Register gagal.');
     } finally {
       setLoading(false);
     }

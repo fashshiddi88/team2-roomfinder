@@ -5,10 +5,26 @@ import { useEffect, useState } from 'react';
 import { getPropertyDetail } from '@/lib/api/axios';
 import PropertyDetail from '@/components/PropertyDetail';
 import LoadingScreen from '@/components/LoadingScreen';
+interface Property {
+  id: number;
+  name: string;
+  description?: string;
+  image?: string;
+  images?: string[];
+  location?: string;
+  city?: {
+    name: string;
+  };
+  category?: {
+    name: string;
+  };
+  price?: number;
+  deletedAt?: string | null;
+}
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
-  const [property, setProperty] = useState<any>(null);
+  const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,7 +45,8 @@ export default function PropertyDetailPage() {
   }, [id]);
 
   if (loading) return <LoadingScreen />;
-  if (!property) return <div className="text-center py-10">Property not found</div>;
+  if (!property)
+    return <div className="text-center py-10">Property not found</div>;
 
   return <PropertyDetail property={property} />;
 }

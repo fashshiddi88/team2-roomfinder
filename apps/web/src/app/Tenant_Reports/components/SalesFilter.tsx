@@ -2,17 +2,23 @@
 'use client';
 
 import { DateRange } from 'react-date-range';
+import { Range } from 'react-date-range';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 
 interface SalesFilterProps {
-  dateRange: any[];
-  setDateRange: (range: any[]) => void;
+  dateRange: Range[];
+  setDateRange: (range: Range[]) => void;
   sortOrder: 'asc' | 'desc';
   setSortOrder: (order: 'asc' | 'desc') => void;
 }
 
-export default function SalesFilter({ dateRange, setDateRange, sortOrder, setSortOrder }: SalesFilterProps) {
+export default function SalesFilter({
+  dateRange,
+  setDateRange,
+  sortOrder,
+  setSortOrder,
+}: SalesFilterProps) {
   return (
     <div>
       <label className="font-medium text-gray-600">Filter by Date</label>

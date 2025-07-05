@@ -7,6 +7,8 @@ import {
   rejectBookingByTenant,
   cancelBookingByTenant,
 } from '@/lib/api/axios';
+import { Booking } from '@/types/booking';
+import { AxiosError } from 'axios';
 import { BookingStatus } from '@/types/property';
 import { withAuthRoles } from '@/middleware/withAuthRoles';
 import TenantSidebar from '../Tenant_Navbar/page';
@@ -22,7 +24,7 @@ function TenantBookingsPage() {
     'Confirmed',
   ];
   const [activeTab, setActiveTab] = useState('All');
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -101,11 +103,12 @@ function TenantBookingsPage() {
       await cancelBookingByTenant(bookingId);
       Swal.fire('Dibatalkan', 'Booking berhasil dibatalkan.', 'success');
       await fetchBookings();
-    } catch (error: any) {
-      console.error('DEBUG ERROR:', error?.response?.data || error.message);
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
+      console.error('DEBUG ERROR:', err?.response?.data || err.message);
       Swal.fire(
         'Gagal',
-        error?.response?.data?.detail || 'Terjadi kesalahan',
+        err?.response?.data?.detail || 'Terjadi kesalahan',
         'error',
       );
     }

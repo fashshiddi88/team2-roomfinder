@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { registerTenantSchema } from '@/lib/validations/validations.schema';
 import { registerTenant } from '@/lib/api/axios';
 import { toast } from 'sonner';
@@ -10,6 +9,7 @@ import Text from '../atomics/Text';
 import Button from '../atomics/Button';
 import Link from 'next/link';
 import { FcGoogle } from 'react-icons/fc';
+import { AxiosError } from 'axios';
 
 export default function RegisterTenantForm() {
   const [email, setEmail] = useState('');
@@ -38,8 +38,9 @@ export default function RegisterTenantForm() {
       setSuccess(true);
       setEmail('');
       setCompanyName('');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Register tenant gagal.');
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
+      toast.error(err.response?.data?.detail || 'Register tenant gagal.');
     } finally {
       setLoading(false);
     }

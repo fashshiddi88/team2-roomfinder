@@ -12,6 +12,7 @@ import Link from 'next/link';
 import LoadingScreen from '../LoadingScreen';
 import { useAuth } from '@/app/utils/hook/useAuth';
 import { useRouter } from 'next/navigation';
+import { AxiosError } from 'axios';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -67,11 +68,10 @@ export default function LoginForm() {
       }
 
       router.push('/');
-    } catch (error: any) {
-      console.error(error);
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
       toast.error(
-        error.response?.data?.message ||
-          'Email atau password salah, coba lagi.',
+        err.response?.data?.detail || 'Email atau password salah, coba lagi.',
       );
     } finally {
       setLoading(false);

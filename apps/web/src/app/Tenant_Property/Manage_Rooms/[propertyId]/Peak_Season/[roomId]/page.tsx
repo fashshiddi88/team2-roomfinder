@@ -10,10 +10,11 @@ import PeakSeasonTable from '../PeakSeasonTable';
 import { getPeakSeasonsByRoomId } from '@/lib/api/axios';
 import { toast } from 'sonner';
 import { PeakSeasonType } from '@/types/property';
+import { AxiosError } from 'axios';
 
 function TenantMyRoomPage() {
   const { propertyId, roomId } = useParams();
-  const [peakSeasons, setRooms] = useState<PeakSeasonType[]>([]);
+  const [rooms, setRooms] = useState<PeakSeasonType[]>([]);
 
   useEffect(() => {
     const fetchRoomData = async () => {
@@ -22,8 +23,14 @@ function TenantMyRoomPage() {
         const parsedId = Array.isArray(roomId) ? roomId[0] : roomId;
         const room = await getPeakSeasonsByRoomId(Number(parsedId));
         setRooms(room.data);
-      } catch (error) {
-        toast.error('Gagal memuat data peak season.');
+        if (rooms !== null) {
+          console.log('Current user ID:', rooms);
+        }
+      } catch (error: unknown) {
+        const err = error as AxiosError<{ detail?: string }>;
+        toast.error(
+          err.response?.data?.detail || 'Gagal memuat data peak season.',
+        );
       }
     };
     fetchRoomData();

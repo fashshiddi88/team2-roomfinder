@@ -6,6 +6,7 @@ import DatePicker from 'react-datepicker';
 import { getAllCities } from '@/lib/api/axios';
 import { toast } from 'sonner';
 import 'react-datepicker/dist/react-datepicker.css';
+import { AxiosError } from 'axios';
 
 export default function SearchForm() {
   const [checkInDate, setCheckInDate] = useState<Date | null>(null);
@@ -21,8 +22,9 @@ export default function SearchForm() {
       try {
         const data = await getAllCities();
         setCities(data);
-      } catch (err) {
-        toast.error('Gagal memuat data kota');
+      } catch (error: unknown) {
+        const err = error as AxiosError<{ detail?: string }>;
+        toast.error(err.response?.data?.detail || 'Gagal memuat data kota');
       }
     };
     fetchCities();
@@ -39,7 +41,7 @@ export default function SearchForm() {
     if (!checkInDate || !checkOutDate || !selectedCityId) return;
 
     router.push(
-      `/Explore?cityId=${selectedCityId}&checkIn=${toISOStringWithOffset(checkInDate)}&checkOut=${toISOStringWithOffset(checkOutDate)}&guests=${guests}`
+      `/Explore?cityId=${selectedCityId}&checkIn=${toISOStringWithOffset(checkInDate)}&checkOut=${toISOStringWithOffset(checkOutDate)}&guests=${guests}`,
     );
   };
 

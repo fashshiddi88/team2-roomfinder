@@ -9,6 +9,7 @@ import Button from '../atomics/Button';
 import Text from '../atomics/Text';
 import LoadingScreen from '../LoadingScreen';
 import { verifyPasswordSchema } from '@/lib/validations/validations.schema';
+import { AxiosError } from 'axios';
 
 export default function ResetPassword() {
   const router = useRouter();
@@ -52,8 +53,9 @@ export default function ResetPassword() {
       await resetPassword(token, password);
       toast.success('Password berhasil direset! Silakan login.');
       setSuccess(true); // baru trigger redirect via useEffect
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Gagal mereset password.');
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ detail?: string }>;
+      toast.error(err.response?.data?.detail || 'Gagal mereset password.');
     } finally {
       setLoading(false);
     }

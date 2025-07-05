@@ -41,7 +41,12 @@ export default function PropertyDetail() {
       try {
         const data = await getPropertyDetail(propertyId, startDate, endDate);
         setProperty(data);
-      } catch (err) {
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          console.error('Error fetching property detail:', err.message);
+        } else {
+          console.error('Unknown error:', err);
+        }
         toast.error('Gagal mengambil detail properti');
       }
     };
@@ -71,7 +76,12 @@ export default function PropertyDetail() {
       // Fetch data berdasarkan tanggal baru
       const data = await getPropertyDetail(propertyId, startDate, endDate);
       setProperty(data);
-    } catch (err) {
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error('Error fetching property detail:', err.message);
+      } else {
+        console.error('Unknown error:', err);
+      }
       toast.error('Failed to fetch availability');
     }
   };
@@ -94,10 +104,8 @@ export default function PropertyDetail() {
         setGuests={setGuests}
         onCheckAvailability={handleCheckAvailability}
       />
-      
 
       <div className="max-w-screen-xl mx-auto px-4 pt-24 pb-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-
         <div className="lg:col-span-2 space-y-8">
           {/* Gallery */}
           <GallerySection property={property} />

@@ -6,6 +6,7 @@ import RevenueSummary from './components/RevenueSummary';
 import { useState, useMemo, useEffect } from 'react';
 import { getMonthlyIncomeReport } from '@/lib/api/axios';
 import TenantSidebar from '../Tenant_Navbar/page';
+import { Range } from 'react-date-range';
 
 export interface Booking {
   id: number;
@@ -36,7 +37,7 @@ export interface Booking {
 
 export default function TenantReportPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [dateRange, setDateRange] = useState(() => {
+  const [dateRange, setDateRange] = useState<Range[]>(() => {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -82,6 +83,7 @@ export default function TenantReportPage() {
   const filteredReports = useMemo(() => {
     const from = dateRange[0].startDate;
     const to = dateRange[0].endDate;
+    if (!from || !to) return [];
 
     return salesReports
       .filter((tx) => {

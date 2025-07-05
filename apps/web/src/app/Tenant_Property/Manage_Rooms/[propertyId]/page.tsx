@@ -10,6 +10,7 @@ import TenantRoomTable from '../RoomTable';
 import { getRoomsByProperty } from '@/lib/api/axios';
 import { toast } from 'sonner';
 import { RoomType } from '@/types/property';
+import { AxiosError } from 'axios';
 
 function TenantMyRoomPage() {
   const { propertyId } = useParams();
@@ -22,8 +23,9 @@ function TenantMyRoomPage() {
         const parsedId = Array.isArray(propertyId) ? propertyId[0] : propertyId;
         const room = await getRoomsByProperty(Number(parsedId));
         setRooms(room.data);
-      } catch (error) {
-        toast.error('Gagal memuat data kamar.');
+      } catch (error: unknown) {
+        const err = error as AxiosError<{ detail?: string }>;
+        toast.error(err.response?.data?.detail || 'Gagal memuat data kamar.');
       }
     };
     fetchRoomData();
