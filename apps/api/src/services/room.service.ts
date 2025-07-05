@@ -191,7 +191,6 @@ export class RoomService {
     return prisma.room.findMany({
       where: {
         propertyId,
-        deletedAt: null,
       },
       include: {
         availabilities: true,

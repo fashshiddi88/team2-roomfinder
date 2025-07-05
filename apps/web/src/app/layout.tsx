@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Toaster } from 'sonner';
 import './globals.css';
-import { ProfileProvider } from '@/app/context/ProfileContext'; // ✅ Tambahkan ini
+import { ProfileProvider } from '@/app/context/ProfileContext';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Room Finder - Find Your Perfect Stay',
   description: 'Browse and book the best properties for your next adventure',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
@@ -30,11 +33,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Toaster position="bottom-right" richColors />
-        
-        {/* ✅ Bungkus dengan ProfileProvider */}
-        <ProfileProvider>
-          {children}
-        </ProfileProvider>
+
+        <ProfileProvider>{children}</ProfileProvider>
       </body>
     </html>
   );
