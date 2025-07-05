@@ -11,6 +11,7 @@ export function withAuthRoles<P>(allowedRoles: string[]) {
       const [checked, setChecked] = useState(false);
 
       useEffect(() => {
+        if (typeof window === 'undefined') return;
         const token = localStorage.getItem('token');
         const role = localStorage.getItem('role');
 
